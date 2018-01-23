@@ -8,6 +8,7 @@ import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.AssistApplication;
@@ -17,10 +18,11 @@ import com.voiceassist.lixinyu.voiceassist.common.widget.LoadingDialog;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.INodeId;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
-import com.voiceassist.lixinyu.voiceassist.entity.dto.SecondLevelNode;
 import com.voiceassist.lixinyu.voiceassist.entity.vo.AllData;
 import com.voiceassist.lixinyu.voiceassist.entity.vo.GridViewVo;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapter;
+import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterFirstLevel;
+import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterSecondLevel;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.MainPagerAdapter;
 import com.voiceassist.lixinyu.voiceassist.utils.FileUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.JsonUtils;
@@ -48,6 +50,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private ViewPager mViewPagerFirstLevel;
     private ViewPager mViewPagerSecondLevel;
+    private TextView mTvFirstLevelName;
 
     private MainPagerAdapter mPagerAdapterFirstLevel;
     private MainPagerAdapter mPagerAdapterSecondLevel;
@@ -74,6 +77,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private void initViews() {
         mViewPagerFirstLevel = findViewById(R.id.main_viewpager_first_level);
         mViewPagerSecondLevel = findViewById(R.id.main_viewpager_second_level);
+        mTvFirstLevelName = findViewById(R.id.main_textview_first_level_name);
 
         mLoadingDialog = new LoadingDialog(this);
     }
@@ -86,7 +90,12 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         mOnFirstLevelClickListener = new GridAdapter.OnItemClickListener() {
             @Override
             public void onClick(int position, GridViewVo vo) {
-                if (null == vo || null == vo.relationship || null == vo.relationship.secondLevelNodes) return;
+                if (null == vo || null == vo.relationship || null == vo.relationship.secondLevelNodes) {
+                    mTvFirstLevelName.setText("");
+                    return;
+                } else if (null != vo.node){
+                    mTvFirstLevelName.setText(vo.node.cnName);
+                }
 
                 mPagerAdapterSecondLevel = new MainPagerAdapter(getPagers(vo.relationship.secondLevelNodes));
                 mViewPagerSecondLevel.setAdapter(mPagerAdapterSecondLevel);
@@ -189,7 +198,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         gridView.setHorizontalSpacing(5);
         gridView.setVerticalSpacing(5);
         gridView.setNumColumns(3);
-        GridAdapter adapter = new GridAdapter(this, data, 3);
+        GridAdapter adapter = new GridAdapterFirstLevel(this, data, 3);
         adapter.setOnItemClickListener(mOnFirstLevelClickListener);
         gridView.setAdapter(adapter);
 
@@ -202,66 +211,9 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         gridView.setHorizontalSpacing(5);
         gridView.setVerticalSpacing(5);
         gridView.setNumColumns(3);
-        gridView.setAdapter(new GridAdapter(this, data, 3));
+        gridView.setAdapter(new GridAdapterSecondLevel(this, data, 3));
 
         return gridView;
-    }
-
-    private ArrayList<View> getPagersFirstLevel(List<Relationship> relationshipList) {
-        if (null == relationshipList) return null;
-
-        ArrayList<View> views = new ArrayList<>();
-        List<GridViewVo> onePageData = null;
-
-        for (Relationship relationship : relationshipList) {
-            if (null == relationship) continue;
-
-            if (null != onePageData && onePageData.size() > PAGE_SIZE) {
-                views.add(getOnePageFirstLevel(onePageData));
-                onePageData = new ArrayList<>();
-            }
-
-            Node node = mNodesMap.get(relationship.firstLevelNodeId);
-            if (null == node) continue;
-
-            if (null == onePageData) onePageData = new ArrayList<>();
-            onePageData.add(new GridViewVo(node, relationship));
-
-        }
-
-        if (relationshipList.size() % PAGE_SIZE != 0) {
-            views.add(getOnePageFirstLevel(onePageData));
-        }
-
-        return views;
-    }
-
-    private ArrayList<View> getPagersSecondLevel(List<SecondLevelNode> secondLevelNodeList) {
-        ArrayList<View> views = new ArrayList<>();
-
-        List<GridViewVo> onePageData = null;
-
-        for (SecondLevelNode secondLevelNode : secondLevelNodeList) {
-            if (null == secondLevelNode) continue;
-
-            if (null != onePageData && onePageData.size() >= PAGE_SIZE) {
-                views.add(getOnePageSecondLevel(onePageData));
-                onePageData = new ArrayList<>();
-            }
-
-            Node node = mNodesMap.get(secondLevelNode.secondLevelNodeId);
-            if (null == node) continue;
-
-            if (null == onePageData) onePageData = new ArrayList<>();
-            onePageData.add(new GridViewVo(node, null));
-
-        }
-
-        if (secondLevelNodeList.size() % PAGE_SIZE != 0) {
-            views.add(getOnePageSecondLevel(onePageData));
-        }
-
-        return views;
     }
 
 
@@ -271,11 +223,23 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         ArrayList<View> views = new ArrayList<>();
         List<GridViewVo> onePageData = null;
 
+        int nodeType = -1;
+
         for (INodeId nodeIdEntity : noteIdList) {
             if (null == nodeIdEntity) continue;
 
             if (null != onePageData && onePageData.size() >= PAGE_SIZE) {
-                views.add(getOnePageFirstLevel(onePageData));
+
+                nodeType = nodeIdEntity.getNodeType();
+
+                View view = null;
+                if (INodeId.NODE_TYPE_FIRST_LEVEL == nodeType) {
+                    view = getOnePageFirstLevel(onePageData);
+                } else if (INodeId.NODE_TYPE_SECOND_LEVEL == nodeType) {
+                    view = getOnePageSecondLevel(onePageData);
+                }
+                if (null != view) views.add(view);
+
                 onePageData = new ArrayList<>();
             }
 
@@ -293,7 +257,14 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         }
 
         if (noteIdList.size() % PAGE_SIZE != 0) {
-            views.add(getOnePageFirstLevel(onePageData));
+            View view = null;
+            if (INodeId.NODE_TYPE_FIRST_LEVEL == nodeType) {
+                view = getOnePageFirstLevel(onePageData);
+            } else if (INodeId.NODE_TYPE_SECOND_LEVEL == nodeType) {
+                view = getOnePageSecondLevel(onePageData);
+            }
+
+            if (null != view) views.add(view);
         }
 
         return views;

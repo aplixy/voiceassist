@@ -16,4 +16,9 @@ public class Relationship implements Serializable, INodeId {
     public String getNodeId() {
         return firstLevelNodeId;
     }
+
+    @Override
+    public int getNodeType() {
+        return NODE_TYPE_FIRST_LEVEL;
+    }
 }

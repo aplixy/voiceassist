@@ -13,4 +13,9 @@ public class SecondLevelNode implements Serializable, INodeId {
     public String getNodeId() {
         return secondLevelNodeId;
     }
+
+    @Override
+    public int getNodeType() {
+        return NODE_TYPE_SECOND_LEVEL;
+    }
 }
