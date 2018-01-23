@@ -47,6 +47,13 @@ public class PlayerUtils {
 
             mediaPlayer.prepare();
             mediaPlayer.start();
+
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    mediaPlayer.release();
+                }
+            });
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             ToastUtils.showToast("未找到语音文件");
