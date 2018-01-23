@@ -1,4 +1,7 @@
-package com.voiceassist.lixinyu.voiceassist.entity;
+package com.voiceassist.lixinyu.voiceassist.entity.vo;
+
+import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
+import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
 
 import java.io.Serializable;
 import java.util.List;

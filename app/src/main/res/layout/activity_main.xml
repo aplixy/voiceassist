@@ -9,16 +9,15 @@
     tools:context="com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity">
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/main_viewpager_top"
+        android:id="@+id/main_viewpager_first_level"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <TextView
-        android:id="@+id/main_text"
-        android:layout_width="wrap_content"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/main_viewpager_second_level"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="Hello World!" />
+        android:layout_weight="1"/>
 
 </LinearLayout>

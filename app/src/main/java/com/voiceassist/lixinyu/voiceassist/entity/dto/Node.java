@@ -1,4 +1,4 @@
-package com.voiceassist.lixinyu.voiceassist.entity;
+package com.voiceassist.lixinyu.voiceassist.entity.dto;
 
 import java.io.Serializable;
 

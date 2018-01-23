@@ -8,16 +8,18 @@ import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.GridView;
-import android.widget.TextView;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.AssistApplication;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
 import com.voiceassist.lixinyu.voiceassist.common.Constants;
 import com.voiceassist.lixinyu.voiceassist.common.widget.LoadingDialog;
-import com.voiceassist.lixinyu.voiceassist.entity.AllData;
-import com.voiceassist.lixinyu.voiceassist.entity.Node;
-import com.voiceassist.lixinyu.voiceassist.entity.Relationship;
+import com.voiceassist.lixinyu.voiceassist.entity.dto.INodeId;
+import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
+import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
+import com.voiceassist.lixinyu.voiceassist.entity.dto.SecondLevelNode;
+import com.voiceassist.lixinyu.voiceassist.entity.vo.AllData;
+import com.voiceassist.lixinyu.voiceassist.entity.vo.GridViewVo;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapter;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.MainPagerAdapter;
 import com.voiceassist.lixinyu.voiceassist.utils.FileUtils;
@@ -44,16 +46,18 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-    private TextView mTvMain;
-    private ViewPager mViewPagerTop;
-    private ViewPager mViewPagerBottom;
-    private MainPagerAdapter mPagerAdapterTop;
+    private ViewPager mViewPagerFirstLevel;
+    private ViewPager mViewPagerSecondLevel;
+
+    private MainPagerAdapter mPagerAdapterFirstLevel;
+    private MainPagerAdapter mPagerAdapterSecondLevel;
 
     private LoadingDialog mLoadingDialog;
 
 
     private ArrayMap<String, Node> mNodesMap;
-    private ArrayMap<String, Relationship> mRelationMap;
+
+    private GridAdapter.OnItemClickListener mOnFirstLevelClickListener;
 
 
     @Override
@@ -63,18 +67,31 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
         initViews();
         initData();
+        initListener();
     }
 
 
     private void initViews() {
-        mTvMain = findViewById(R.id.main_text);
-        mViewPagerTop = findViewById(R.id.main_viewpager_top);
+        mViewPagerFirstLevel = findViewById(R.id.main_viewpager_first_level);
+        mViewPagerSecondLevel = findViewById(R.id.main_viewpager_second_level);
 
         mLoadingDialog = new LoadingDialog(this);
     }
 
     private void initData() {
         getData();
+    }
+
+    private void initListener() {
+        mOnFirstLevelClickListener = new GridAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(int position, GridViewVo vo) {
+                if (null == vo || null == vo.relationship || null == vo.relationship.secondLevelNodes) return;
+
+                mPagerAdapterSecondLevel = new MainPagerAdapter(getPagers(vo.relationship.secondLevelNodes));
+                mViewPagerSecondLevel.setAdapter(mPagerAdapterSecondLevel);
+            }
+        };
     }
 
 
@@ -95,7 +112,17 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                 .map(new Function<String, AllData>() {
                     @Override
                     public AllData apply(String filePath) throws Exception {
-                        return getDataSync(filePath);
+                        AllData allData = getDataSync(filePath);
+
+                        if (null != allData && null != allData.nodes) {
+                            mNodesMap = new ArrayMap<>();
+                            for (Node node : allData.nodes) {
+                                if (null == node) continue;
+                                mNodesMap.put(node.id, node);
+                            }
+                        }
+
+                        return allData;
                     }
                 }).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<AllData>() {
@@ -148,47 +175,28 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     }
 
     private void renderView(AllData allData) {
-        if (null == allData || null == allData.nodes || null == allData.relationship) return;
+        if (null == allData) return;
 
-        mNodesMap = new ArrayMap<>();
-        for (Node node : allData.nodes) {
-            if (null == node) continue;
-            mNodesMap.put(node.id, node);
-        }
+        mPagerAdapterFirstLevel = new MainPagerAdapter(getPagers(allData.relationship));
+        mViewPagerFirstLevel.setAdapter(mPagerAdapterFirstLevel);
 
-        mRelationMap = new ArrayMap<>();
-        ArrayList<View> views = new ArrayList<>();
-        List<String> onePageData = null;
-
-        int i = 0;
-        for (Relationship relationship : allData.relationship) {
-            if (null == relationship) continue;
-
-            mRelationMap.put(relationship.firstLevelNodeId, relationship);
-
-            if (i % PAGE_SIZE == 0) {
-                if (i > 0) {
-                    views.add(getPageView(onePageData));
-                }
-                onePageData = new ArrayList<>();
-            }
-
-            onePageData.add(mNodesMap.get(relationship.firstLevelNodeId).cnName + " ");
-
-            i++;
-        }
-
-        if (allData.relationship.size() % PAGE_SIZE != 0) {
-            views.add(getPageView(onePageData));
-        }
-
-        mPagerAdapterTop = new MainPagerAdapter(views);
-        mViewPagerTop.setAdapter(mPagerAdapterTop);
-        
     }
 
 
-    private View getPageView(final List<String> data) {
+    private View getOnePageFirstLevel(List<GridViewVo> data) {
+        GridView gridView = new GridView(this);
+
+        gridView.setHorizontalSpacing(5);
+        gridView.setVerticalSpacing(5);
+        gridView.setNumColumns(3);
+        GridAdapter adapter = new GridAdapter(this, data, 3);
+        adapter.setOnItemClickListener(mOnFirstLevelClickListener);
+        gridView.setAdapter(adapter);
+
+        return gridView;
+    }
+
+    private View getOnePageSecondLevel(List<GridViewVo> data) {
         GridView gridView = new GridView(this);
 
         gridView.setHorizontalSpacing(5);
@@ -197,6 +205,98 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         gridView.setAdapter(new GridAdapter(this, data, 3));
 
         return gridView;
+    }
+
+    private ArrayList<View> getPagersFirstLevel(List<Relationship> relationshipList) {
+        if (null == relationshipList) return null;
+
+        ArrayList<View> views = new ArrayList<>();
+        List<GridViewVo> onePageData = null;
+
+        for (Relationship relationship : relationshipList) {
+            if (null == relationship) continue;
+
+            if (null != onePageData && onePageData.size() > PAGE_SIZE) {
+                views.add(getOnePageFirstLevel(onePageData));
+                onePageData = new ArrayList<>();
+            }
+
+            Node node = mNodesMap.get(relationship.firstLevelNodeId);
+            if (null == node) continue;
+
+            if (null == onePageData) onePageData = new ArrayList<>();
+            onePageData.add(new GridViewVo(node, relationship));
+
+        }
+
+        if (relationshipList.size() % PAGE_SIZE != 0) {
+            views.add(getOnePageFirstLevel(onePageData));
+        }
+
+        return views;
+    }
+
+    private ArrayList<View> getPagersSecondLevel(List<SecondLevelNode> secondLevelNodeList) {
+        ArrayList<View> views = new ArrayList<>();
+
+        List<GridViewVo> onePageData = null;
+
+        for (SecondLevelNode secondLevelNode : secondLevelNodeList) {
+            if (null == secondLevelNode) continue;
+
+            if (null != onePageData && onePageData.size() >= PAGE_SIZE) {
+                views.add(getOnePageSecondLevel(onePageData));
+                onePageData = new ArrayList<>();
+            }
+
+            Node node = mNodesMap.get(secondLevelNode.secondLevelNodeId);
+            if (null == node) continue;
+
+            if (null == onePageData) onePageData = new ArrayList<>();
+            onePageData.add(new GridViewVo(node, null));
+
+        }
+
+        if (secondLevelNodeList.size() % PAGE_SIZE != 0) {
+            views.add(getOnePageSecondLevel(onePageData));
+        }
+
+        return views;
+    }
+
+
+    private <T extends INodeId> ArrayList<View> getPagers(List<T> noteIdList) {
+        if (null == noteIdList) return null;
+
+        ArrayList<View> views = new ArrayList<>();
+        List<GridViewVo> onePageData = null;
+
+        for (INodeId nodeIdEntity : noteIdList) {
+            if (null == nodeIdEntity) continue;
+
+            if (null != onePageData && onePageData.size() >= PAGE_SIZE) {
+                views.add(getOnePageFirstLevel(onePageData));
+                onePageData = new ArrayList<>();
+            }
+
+            Node node = mNodesMap.get(nodeIdEntity.getNodeId());
+            if (null == node) continue;
+
+            if (null == onePageData) onePageData = new ArrayList<>();
+
+            Relationship relationship = null;
+            if (nodeIdEntity instanceof Relationship) {
+                relationship = (Relationship) nodeIdEntity;
+            }
+            onePageData.add(new GridViewVo(node, relationship));
+
+        }
+
+        if (noteIdList.size() % PAGE_SIZE != 0) {
+            views.add(getOnePageFirstLevel(onePageData));
+        }
+
+        return views;
     }
 
 
