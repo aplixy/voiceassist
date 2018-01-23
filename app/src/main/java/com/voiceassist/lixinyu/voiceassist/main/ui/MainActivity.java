@@ -101,6 +101,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                 mViewPagerSecondLevel.setAdapter(mPagerAdapterSecondLevel);
             }
         };
+
     }
 
 
@@ -230,7 +231,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
             if (null != onePageData && onePageData.size() >= PAGE_SIZE) {
 
-                nodeType = nodeIdEntity.getNodeType();
+                if (-1 == nodeType) nodeType = nodeIdEntity.getNodeType();
 
                 View view = null;
                 if (INodeId.NODE_TYPE_FIRST_LEVEL == nodeType) {

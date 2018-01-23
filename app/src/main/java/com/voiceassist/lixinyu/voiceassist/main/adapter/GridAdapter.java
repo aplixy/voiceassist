@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.entity.vo.GridViewVo;
+import com.voiceassist.lixinyu.voiceassist.utils.PlayerUtils;
 
 import java.util.List;
 
@@ -76,8 +77,15 @@ public abstract class GridAdapter extends BaseAdapter implements View.OnClickLis
     public void onClick(View v) {
         int position = (int) (v.getTag(R.id.grid_index_tag));
 
+        GridViewVo vo = mData.get(position);
+
+        if (null != vo && null != vo.node && null != vo.node.audioPath) {
+            PlayerUtils.getInstance(mContext).playSound(vo.node.audioPath);
+        }
+
+
         if (null != mOnItemClickListener) {
-            mOnItemClickListener.onClick(position, mData.get(position));
+            mOnItemClickListener.onClick(position, vo);
         }
     }
 
