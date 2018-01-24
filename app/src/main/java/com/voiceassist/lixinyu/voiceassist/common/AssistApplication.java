@@ -204,7 +204,8 @@ public class AssistApplication extends Application {
          * 参数2：appId
          * 参数3：是否开启debug
          */
-        Bugly.init(getApplicationContext(), APP_ID, true);
+        Bugly.init(getApplicationContext(), APP_ID, false);
+
 
         /**
          * 如果想自定义策略，按照如下方式设置

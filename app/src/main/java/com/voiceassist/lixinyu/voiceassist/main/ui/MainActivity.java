@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.tencent.bugly.beta.Beta;
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.AssistApplication;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
@@ -71,6 +72,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         initViews();
         initData();
         initListener();
+
+        Beta.checkUpgrade();
     }
 
 
