@@ -14,6 +14,6 @@ public class BaseActivity extends AppCompatActivity {
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
 
-        //getSupportActionBar().hide();
+        getSupportActionBar().hide();
     }
 }

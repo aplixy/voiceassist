@@ -16,6 +16,7 @@ import com.voiceassist.lixinyu.voiceassist.common.AssistApplication;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
 import com.voiceassist.lixinyu.voiceassist.common.Constants;
 import com.voiceassist.lixinyu.voiceassist.common.widget.LoadingDialog;
+import com.voiceassist.lixinyu.voiceassist.common.widget.ViewPagerPointer;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.INodeId;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
@@ -63,6 +64,9 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private GridAdapter.OnItemClickListener mOnFirstLevelClickListener;
 
+    private ViewPagerPointer mPagerPointerFirstLevel;
+    private ViewPagerPointer mPagerPointerSecondLevel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +77,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         initData();
         initListener();
 
-        Beta.checkUpgrade();
+        Beta.checkUpgrade(false, true);
     }
 
 
@@ -83,6 +87,9 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         mTvFirstLevelName = findViewById(R.id.main_textview_first_level_name);
 
         mLoadingDialog = new LoadingDialog(this);
+
+        mPagerPointerFirstLevel = findViewById(R.id.main_pager_indicator_first_level);
+        mPagerPointerSecondLevel = findViewById(R.id.main_pager_indicator_second_level);
     }
 
     private void initData() {
@@ -100,8 +107,16 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                     mTvFirstLevelName.setText(vo.node.cnName);
                 }
 
+
+                if (null != vo.relationship && null != vo.relationship.secondLevelNodes && vo.relationship.secondLevelNodes.size() > 0) {
+                    mPagerPointerSecondLevel.setVisibility(View.VISIBLE);
+                } else {
+                    mPagerPointerSecondLevel.setVisibility(View.INVISIBLE);
+                }
+
                 mPagerAdapterSecondLevel = new MainPagerAdapter(getPagers(vo.relationship.secondLevelNodes));
                 mViewPagerSecondLevel.setAdapter(mPagerAdapterSecondLevel);
+                mPagerPointerSecondLevel.setViewPager(mViewPagerSecondLevel);
             }
         };
 
@@ -192,6 +207,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
         mPagerAdapterFirstLevel = new MainPagerAdapter(getPagers(allData.relationship));
         mViewPagerFirstLevel.setAdapter(mPagerAdapterFirstLevel);
+
+        mPagerPointerFirstLevel.setViewPager(mViewPagerFirstLevel);
 
     }
 

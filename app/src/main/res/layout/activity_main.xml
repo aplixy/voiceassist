@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/colorBackground"
+    android:padding="5dp"
     tools:context="com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity">
 
     <android.support.v4.view.ViewPager
@@ -17,6 +18,15 @@
         android:background="@color/colorPrimary"
         android:paddingTop="3dp"
         android:layout_weight="1"/>
+
+    <com.voiceassist.lixinyu.voiceassist.common.widget.ViewPagerPointer
+        android:id="@+id/main_pager_indicator_first_level"
+        android:layout_width="100dp"
+        android:layout_height="10dp"
+        android:layout_gravity="right"
+        app:colorBgPoint="@android:color/white"
+        app:pointSize="10dp"
+        app:colorIndicatorPoint="@color/colorButtonStroke"/>
 
     <TextView
         android:id="@+id/main_textview_first_level_name"
@@ -32,6 +42,7 @@
         android:paddingLeft="30dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp"
+        android:layout_marginTop="5dp"
         android:background="@drawable/shape_mark"/>
 
     <android.support.v4.view.ViewPager
@@ -40,5 +51,15 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="5dp"/>
+
+    <com.voiceassist.lixinyu.voiceassist.common.widget.ViewPagerPointer
+        android:id="@+id/main_pager_indicator_second_level"
+        android:layout_width="50dp"
+        android:layout_height="10dp"
+        android:layout_gravity="right"
+        android:visibility="invisible"
+        app:colorBgPoint="@android:color/white"
+        app:pointSize="10dp"
+        app:colorIndicatorPoint="@color/colorButtonStroke"/>
 
 </LinearLayout>

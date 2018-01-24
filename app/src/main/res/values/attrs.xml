@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ViewPagerPointer">
+        <attr name="pointSize" format="dimension" />
+        <attr name="pointPadding" format="dimension" />
+        <attr name="maxCount" format="integer" />
+        <attr name="colorIndicatorPoint" format="color" />
+        <attr name="colorBgPoint" format="color" />
+    </declare-styleable>
+</resources>
