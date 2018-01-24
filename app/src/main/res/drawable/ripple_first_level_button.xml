@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:color="@color/colorButtonStroke"
+    tools:targetApi="lollipop">
+    <!--<item-->
+    <!--android:id="@android:id/mask"-->
+    <!--android:drawable="@drawable/custom_shape"/>-->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="10dp"/>
+            <stroke android:width="2.0dip"
+                android:color="@color/colorButtonStroke"
+                android:dashWidth="3.0dip"
+                android:dashGap="0.0dip" />
+            <solid android:color="@color/colorFirstLevelButton"/>
+        </shape>
+    </item>
+</ripple>

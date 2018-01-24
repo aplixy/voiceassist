@@ -6,29 +6,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/colorBackground"
     tools:context="com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity">
 
     <android.support.v4.view.ViewPager
         android:id="@+id/main_viewpager_first_level"
         android:layout_width="match_parent"
+        android:layout_marginTop="0dp"
         android:layout_height="0dp"
+        android:background="@color/colorPrimary"
+        android:paddingTop="3dp"
         android:layout_weight="1"/>
 
     <TextView
         android:id="@+id/main_textview_first_level_name"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="end"
-        android:textSize="17sp"
-        android:textStyle="bold|italic"
-        android:padding="2dp"/>
+        android:textSize="20sp"
+        android:text="请点击上边按钮"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:paddingRight="30dp"
+        android:paddingLeft="30dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:background="@drawable/shape_mark"/>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/main_viewpager_second_level"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="2dp"/>
+        android:layout_marginTop="5dp"/>
 
 </LinearLayout>

@@ -196,8 +196,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private View getOnePageFirstLevel(List<GridViewVo> data) {
         GridView gridView = new GridView(this);
 
-        gridView.setHorizontalSpacing(5);
-        gridView.setVerticalSpacing(5);
+        gridView.setHorizontalSpacing(9);
+        gridView.setVerticalSpacing(9);
         gridView.setNumColumns(3);
         GridAdapter adapter = new GridAdapterFirstLevel(this, data, 3);
         adapter.setOnItemClickListener(mOnFirstLevelClickListener);
@@ -209,8 +209,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private View getOnePageSecondLevel(List<GridViewVo> data) {
         GridView gridView = new GridView(this);
 
-        gridView.setHorizontalSpacing(5);
-        gridView.setVerticalSpacing(5);
+        gridView.setHorizontalSpacing(9);
+        gridView.setVerticalSpacing(9);
         gridView.setNumColumns(3);
         gridView.setAdapter(new GridAdapterSecondLevel(this, data, 3));
 

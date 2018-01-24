@@ -2,15 +2,11 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorAccent">
+    android:background="@drawable/ripple_second_level_button">
 
     <TextView
         android:id="@+id/main_item_second_level_textview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        style="@style/mainButtonTextStyle"
         android:text="test"/>
 
 </FrameLayout>
