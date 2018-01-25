@@ -40,17 +40,36 @@ public class PlayerUtils {
         return mInstance;
     }
 
-    public void playSound(String filePath) {
-
+    public void play(String filePath) {
         if (null == filePath || filePath.length() < 5) {
             ToastUtils.showToast("语音文件路径无效");
             return;
         }
 
-        if (filePath.contains(Constants.AUDIO_RECORD_PATH)) {
-            playSdCard(filePath);
-            return;
+        boolean success = playAssests(filePath);
+
+        if (!success) {
+            if (filePath.endsWith("m4a")) filePath = replaceAffix(filePath, "mp3");
+            else if (filePath.endsWith("mp3")) filePath = replaceAffix(filePath, "m4a");
+
+            success = playAssests(filePath);
+
+            if (!success) {
+                success = playSdCard(filePath);
+
+                if (!success) {
+                    if (filePath.endsWith("m4a")) filePath = replaceAffix(filePath, "mp3");
+                    else if (filePath.endsWith("mp3")) filePath = replaceAffix(filePath, "m4a");
+
+                    success = playSdCard(filePath);
+
+                    if (!success) ToastUtils.showToast("音频文件未找到");
+                }
+            }
         }
+    }
+
+    public boolean playAssests(String filePath) {
 
         MediaPlayer mediaPlayer = null;
 
@@ -71,20 +90,22 @@ public class PlayerUtils {
             mediaPlayer.prepare();
             mediaPlayer.start();
 
-
+            return true;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            playSdCard(filePath);
+            return false;
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
-    private void playSdCard(String filePath) {
+    private boolean playSdCard(String filePath) {
         KGLog.i(TAG, "playSdCard--->filePath--->" + filePath);
 
         String sdCardFilePath = filePath;
-        if (!filePath.contains(Constants.AUDIO_RECORD_PATH)) {
+        if (!filePath.contains(Constants.ROOT_PATH)) {
             sdCardFilePath = Constants.ROOT_PATH + filePath;
             KGLog.v(TAG, "playSdCard--->sdCardFilePath--->" + sdCardFilePath);
         }
@@ -106,17 +127,16 @@ public class PlayerUtils {
             mediaPlayer.prepare();
             mediaPlayer.start();
 
-
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
-
-            if (sdCardFilePath.endsWith(".m4a")) {
-                sdCardFilePath = sdCardFilePath.substring(0, sdCardFilePath.length() - 3) + "mp3";
-                playSdCard(sdCardFilePath);
-            } else {
-                ToastUtils.showToast("未找到语音文件");
-            }
         }
+
+        return false;
+    }
+
+    private String replaceAffix(String filePath, String destAffix) {
+        return filePath.substring(0, filePath.length() - 3) + destAffix;
     }
 
 

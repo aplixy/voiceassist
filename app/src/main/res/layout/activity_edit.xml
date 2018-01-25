@@ -23,4 +23,13 @@
         android:layout_marginTop="30dp"
         android:text="编辑关系"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/colorButtonText"
+        android:layout_marginTop="30dp"
+        android:textStyle="bold|italic"
+        android:text="请将录制好的音频文件放到\n手机内置存储目录/voice_assist/\n目录下，按照录入的audioPath目录结构存放，一般在voice_assist/record/目录下"/>
+
 </LinearLayout>

@@ -80,7 +80,7 @@ public abstract class GridAdapter extends BaseAdapter implements View.OnClickLis
         GridViewVo vo = mData.get(position);
 
         if (null != vo && null != vo.node && null != vo.node.audioPath) {
-            PlayerUtils.getInstance(mContext).playSound(vo.node.audioPath);
+            PlayerUtils.getInstance(mContext).play(vo.node.audioPath);
         }
 
 

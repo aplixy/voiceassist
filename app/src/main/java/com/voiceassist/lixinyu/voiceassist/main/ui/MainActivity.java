@@ -379,6 +379,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     public static void saveAllDatas() {
         String jsonData = JsonUtils.getJsonFromObject(MainActivity.mAllData);
         FileUtils.saveTextToFile(jsonData, Constants.JSON_DATA_PATH);
+
+        ToastUtils.showToast("编辑生效");
     }
 
 
