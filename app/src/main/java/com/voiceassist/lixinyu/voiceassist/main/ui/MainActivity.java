@@ -27,7 +27,7 @@ import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapter;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterFirstLevel;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterSecondLevel;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.MainPagerAdapter;
-import com.voiceassist.lixinyu.voiceassist.settings.ui.EditRelationActivity;
+import com.voiceassist.lixinyu.voiceassist.settings.ui.EditActivity;
 import com.voiceassist.lixinyu.voiceassist.utils.FileUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.JsonUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.KGLog;
@@ -59,6 +59,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private static final int CAN_ENTER_FLAG = 2;
     private static final int IDLE_FLAG = -1;
 
+    public static AllData mAllData;
+
 
     private String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
@@ -86,6 +88,9 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private int mExitFlag = IDLE_FLAG;
     private int mTempEnterFlag = IDLE_FLAG;
+
+
+    private Intent mEditIntent;
 
 
     @Override
@@ -130,6 +135,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                 mTempEnterFlag = IDLE_FLAG;
             }
         };
+
+        mEditIntent = new Intent(MainActivity.this, EditActivity.class);
     }
 
     private void initListener() {
@@ -163,7 +170,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                     mTempEnterFlag++;
                     if (mTempEnterFlag == CAN_ENTER_FLAG) {
                         // Enter
-                        startActivity(new Intent(MainActivity.this, EditRelationActivity.class));
+                        startActivity(mEditIntent);
                     } else {
                         if (null != mEnterDisposable) mEnterDisposable.dispose();
                         mEnterDisposable = Observable.timer(1, TimeUnit.SECONDS).subscribe(mTempEnterConsumer);
@@ -256,6 +263,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private void renderView(AllData allData) {
         if (null == allData) return;
+
+        mAllData = allData;
 
         mPagerAdapterFirstLevel = new MainPagerAdapter(getPagers(allData.relationship));
         mViewPagerFirstLevel.setAdapter(mPagerAdapterFirstLevel);

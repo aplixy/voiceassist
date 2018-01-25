@@ -144,7 +144,7 @@ public class AssistApplication extends Application {
                 // 更多的操作：比如设置控件的点击事件
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void onDialogPositiveClick(View v) {
                         Intent intent = new Intent(getApplicationContext(), OtherActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);

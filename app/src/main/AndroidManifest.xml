@@ -52,7 +52,9 @@
         </provider>
 
 
-        <activity android:name=".settings.ui.EditRelationActivity" />
+        <activity android:name=".settings.ui.EditActivity" />
+        <activity android:name=".settings.ui.EditNodeActivity" />
+        <activity android:name=".settings.ui.EditRelationshipActivity" />
 
 
     </application>

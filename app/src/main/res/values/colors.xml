@@ -20,4 +20,7 @@
     <color name="colorButtonText">@color/colorPrimary</color>
 
 
+    <color name="colorDialogText">#7D7D7D</color>
+
+
 </resources>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="400dp"
+    android:layout_height="match_parent"
+    android:background="@drawable/edit_dialog_shape"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/dialog_edit_node_id_title_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="30dp"
+        android:textColor="@color/colorDialogText"
+        android:text="id:"/>
+
+    <EditText
+        android:id="@+id/dialog_edit_node_id_edittext"
+        android:layout_toRightOf="@+id/dialog_edit_node_id_title_textview"
+        android:layout_alignBaseline="@+id/dialog_edit_node_id_title_textview"
+        android:textColor="@color/colorDialogText"
+        android:layout_marginRight="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/dialog_edit_node_cnname_title_textview"
+        android:layout_below="@+id/dialog_edit_node_id_title_textview"
+        android:layout_marginTop="30dp"
+        android:layout_alignLeft="@+id/dialog_edit_node_id_title_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorDialogText"
+        android:text="cnName:"/>
+
+    <EditText
+        android:id="@+id/dialog_edit_node_cnname_edittext"
+        android:layout_alignBaseline="@+id/dialog_edit_node_cnname_title_textview"
+        android:layout_toRightOf="@+id/dialog_edit_node_cnname_title_textview"
+        android:layout_alignRight="@+id/dialog_edit_node_id_edittext"
+        android:singleLine="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/dialog_edit_node_audiopath_title_textview"
+        android:layout_below="@+id/dialog_edit_node_cnname_title_textview"
+        android:layout_alignLeft="@+id/dialog_edit_node_id_title_textview"
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorDialogText"
+        android:text="audioPath:"/>
+
+    <EditText
+        android:id="@+id/dialog_edit_node_audioPath_edittext"
+        android:layout_alignBaseline="@+id/dialog_edit_node_audiopath_title_textview"
+        android:layout_toRightOf="@+id/dialog_edit_node_audiopath_title_textview"
+        android:layout_alignRight="@+id/dialog_edit_node_id_edittext"
+        android:singleLine="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/dialog_edit_node_icon_title_textview"
+        android:layout_below="@+id/dialog_edit_node_audiopath_title_textview"
+        android:layout_alignLeft="@+id/dialog_edit_node_id_title_textview"
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorDialogText"
+        android:text="icon:"/>
+
+    <EditText
+        android:id="@+id/dialog_edit_node_icon_edittext"
+        android:layout_alignBaseline="@+id/dialog_edit_node_icon_title_textview"
+        android:layout_toRightOf="@+id/dialog_edit_node_icon_title_textview"
+        android:layout_alignRight="@+id/dialog_edit_node_id_edittext"
+        android:singleLine="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <View
+        android:id="@+id/dialog_edit_node_horiline"
+        android:layout_below="@+id/dialog_edit_node_icon_title_textview"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_marginTop="30dp"
+        android:background="#E4E4E4" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_below="@+id/dialog_edit_node_horiline"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/dialog_edit_node_button_no"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text="取消"
+            android:textColor="@color/colorDialogText"
+            android:background="@null"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:background="#E4E4E4" />
+
+        <Button
+            android:id="@+id/dialog_edit_node_button_yes"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text="确定"
+            android:textColor="@color/colorButtonStroke"
+            android:background="@null"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</RelativeLayout>
