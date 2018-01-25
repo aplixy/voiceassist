@@ -52,6 +52,9 @@
         </provider>
 
 
+        <activity android:name=".settings.ui.EditRelationActivity" />
+
+
     </application>
 
 </manifest>

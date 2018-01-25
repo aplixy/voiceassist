@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -26,17 +27,21 @@ import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapter;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterFirstLevel;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterSecondLevel;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.MainPagerAdapter;
+import com.voiceassist.lixinyu.voiceassist.settings.ui.EditRelationActivity;
 import com.voiceassist.lixinyu.voiceassist.utils.FileUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.JsonUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.KGLog;
+import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import pub.devrel.easypermissions.AppSettingsDialog;
@@ -49,6 +54,11 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private static final int RC_STORAGE_PERMISSION = 0x100;
 
     private static final int PAGE_SIZE = 9;
+
+    private static final int CAN_EXIT_FLAG = 0x100;
+    private static final int CAN_ENTER_FLAG = 2;
+    private static final int IDLE_FLAG = -1;
+
 
     private String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
@@ -69,6 +79,14 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private ViewPagerPointer mPagerPointerFirstLevel;
     private ViewPagerPointer mPagerPointerSecondLevel;
 
+    private Consumer<Long> mExitConsumer;
+    private Consumer<Long> mTempEnterConsumer;
+
+    private Disposable mEnterDisposable;
+
+    private int mExitFlag = IDLE_FLAG;
+    private int mTempEnterFlag = IDLE_FLAG;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +98,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         initListener();
 
         Beta.checkUpgrade(false, true);
+
     }
 
 
@@ -96,6 +115,21 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private void initData() {
         getData();
+
+        mExitConsumer = new Consumer<Long>() {
+            @Override
+            public void accept(Long aLong) throws Exception {
+                mExitFlag = IDLE_FLAG;
+            }
+        };
+
+        mTempEnterConsumer = new Consumer<Long>() {
+            @Override
+            public void accept(Long aLong) throws Exception {
+                mEnterDisposable = null;
+                mTempEnterFlag = IDLE_FLAG;
+            }
+        };
     }
 
     private void initListener() {
@@ -105,7 +139,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                 if (null == vo || null == vo.relationship || null == vo.relationship.secondLevelNodes) {
                     mTvFirstLevelName.setText("");
                     return;
-                } else if (null != vo.node){
+                } else if (null != vo.node) {
                     mTvFirstLevelName.setText(vo.node.cnName);
                 }
 
@@ -121,8 +155,25 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             }
         };
 
-    }
+        mTvFirstLevelName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+                if (mTempEnterFlag < CAN_ENTER_FLAG) {
+                    mTempEnterFlag++;
+                    if (mTempEnterFlag == CAN_ENTER_FLAG) {
+                        // Enter
+                        startActivity(new Intent(MainActivity.this, EditRelationActivity.class));
+                    } else {
+                        if (null != mEnterDisposable) mEnterDisposable.dispose();
+                        mEnterDisposable = Observable.timer(1, TimeUnit.SECONDS).subscribe(mTempEnterConsumer);
+                    }
+                }
+            }
+        });
+
+
+    }
 
 
     private void getData() {
@@ -281,6 +332,24 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         }
 
         return views;
+    }
+
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+
+            if (mExitFlag == CAN_EXIT_FLAG) {
+                finish();
+                //System.exit(0);
+            } else {
+                mExitFlag = CAN_EXIT_FLAG;
+                Observable.timer(3, TimeUnit.SECONDS).subscribe(mExitConsumer);
+                ToastUtils.showToast("再按一次退出应用");
+            }
+
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
 
