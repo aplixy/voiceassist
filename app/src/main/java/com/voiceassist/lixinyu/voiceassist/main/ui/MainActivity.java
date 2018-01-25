@@ -147,11 +147,13 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         mOnFirstLevelClickListener = new GridAdapter.OnItemClickListener() {
             @Override
             public void onClick(int position, GridViewVo vo) {
-                if (null == vo || null == vo.relationship || null == vo.relationship.secondLevelNodes) {
-                    mTvFirstLevelName.setText("");
-                    return;
-                } else if (null != vo.node) {
+
+                if (null != vo.node) {
                     mTvFirstLevelName.setText(vo.node.cnName);
+                }
+
+                if (null == vo || null == vo.relationship || null == vo.relationship.secondLevelNodes) {
+                    return;
                 }
 
                 if (null != vo.relationship && null != vo.relationship.secondLevelNodes && vo.relationship.secondLevelNodes.size() > 0) {
@@ -279,6 +281,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         mPagerAdapterSecondLevel = new MainPagerAdapter(new ArrayList<View>());
         mViewPagerSecondLevel.setAdapter(mPagerAdapterSecondLevel);
         mPagerPointerSecondLevel.setViewPager(mViewPagerSecondLevel);
+
+        mTvFirstLevelName.setText("请点击以上按钮");
     }
 
 

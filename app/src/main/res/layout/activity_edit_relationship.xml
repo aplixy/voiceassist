@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/ripple_first_level_button"
-        android:text="添加节点"
+        android:text="添加或删除一级节点"
         android:textColor="@android:color/white" />
 
     <android.support.v7.widget.RecyclerView

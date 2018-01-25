@@ -25,7 +25,7 @@ import java.util.List;
  * Created by lilidan on 2018/1/25.
  */
 
-public class EditOrAddRelationActivity extends BaseActivity {
+public class EditSecondLevelRelationActivity extends BaseActivity {
 
     private static final int REQ_ADD_NODE = 0x100;
 
@@ -100,7 +100,7 @@ public class EditOrAddRelationActivity extends BaseActivity {
         mBtnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(EditOrAddRelationActivity.this, NodeSelectionActivity.class);
+                Intent intent = new Intent(EditSecondLevelRelationActivity.this, NodeSelectionActivity.class);
                 if (null != mSecondLevelIdList) {
                     intent.putStringArrayListExtra("selected_nodes_id", mSecondLevelIdList);
                 }

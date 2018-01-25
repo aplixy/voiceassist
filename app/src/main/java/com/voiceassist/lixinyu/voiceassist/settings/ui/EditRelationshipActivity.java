@@ -19,6 +19,7 @@ import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
 import com.voiceassist.lixinyu.voiceassist.settings.adapter.NodeListAdapter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -34,10 +35,12 @@ public class EditRelationshipActivity extends BaseActivity {
     private RecyclerView mRecyclerView;
     private NodeListAdapter mAdapter;
 
-    private Intent mAddIntent;
+    private Intent mItemClickIntent;
 
     private ArrayMap<String, Relationship> mRelationshipMap;
-    private List<Node> mNodeList;
+    private ArrayList<Node> mNodeList;
+
+    private ArrayList<String> mRelationIds;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,10 +67,12 @@ public class EditRelationshipActivity extends BaseActivity {
 
         mNodeList = new ArrayList<>();
         mRelationshipMap = new ArrayMap<>();
+        mRelationIds = new ArrayList<>();
         for (Relationship relationship : relationships) {
             if (null == relationship) continue;
 
             Node node = MainActivity.mNodesMap.get(relationship.firstLevelNodeId);
+            mRelationIds.add(relationship.firstLevelNodeId);
             if (null != node) {
                 mNodeList.add(node);
                 mRelationshipMap.put(node.id, relationship);
@@ -81,26 +86,28 @@ public class EditRelationshipActivity extends BaseActivity {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setAdapter(mAdapter);
 
-        mAddIntent = new Intent(this, EditOrAddRelationActivity.class);
+        mItemClickIntent = new Intent(this, EditSecondLevelRelationActivity.class);
     }
 
     private void initListener() {
         mAdapter.setOnItemClickListener(new NodeListAdapter.OnItemClickListener() {
             @Override
             public void onClick(NodeListAdapter adapter, int position, Node node) {
-                mAddIntent.putExtra("position", position);
-                mAddIntent.putExtra("relationship", mRelationshipMap.get(node.id));
+                mItemClickIntent.putExtra("position", position);
+                mItemClickIntent.putExtra("relationship", mRelationshipMap.get(node.id));
 
-                startActivityForResult(mAddIntent, REQ_EDIT_ADD);
+                startActivity(mItemClickIntent);
             }
         });
 
         mBtnAddRelationship.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                mAddIntent.removeExtra("position");
-//                mAddIntent.removeExtra("relationship");
-//                startActivityForResult(mAddIntent, REQ_EDIT_ADD);
+                Intent intent = new Intent(EditRelationshipActivity.this, NodeSelectionActivity.class);
+                intent.putStringArrayListExtra("selected_nodes_id", mRelationIds);
+                intent.putExtra("title", "请选择一级结点");
+
+                startActivityForResult(intent, REQ_EDIT_ADD);
             }
         });
     }
@@ -109,14 +116,57 @@ public class EditRelationshipActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case REQ_EDIT_ADD: {
+        if (RESULT_OK == resultCode) {
+            switch (requestCode) {
+                case REQ_EDIT_ADD: {
+                    List<Node> selectedNodeList = (List<Node>) data.getSerializableExtra("selected_node_list");
 
-                break;
-            }
+                    mNodeList.clear();
+                    mNodeList.addAll(selectedNodeList);
+                    mAdapter.notifyDataSetChanged();
 
-            default: {
-                break;
+                    HashSet<String> selectedIds = new HashSet<>();
+                    for (Node node : selectedNodeList) {
+                        if (null == node) continue;
+
+                        selectedIds.add(node.id);
+                    }
+
+                    HashSet<String> originalIds = new HashSet<>();
+                    List<Relationship> allDataRelations = MainActivity.mAllData.relationship;
+                    int size = allDataRelations.size();
+                    for (int i = 0; i < size;) {
+                        Relationship relationship = allDataRelations.get(i);
+                        if (null != relationship) {
+                            if (!selectedIds.contains(relationship.firstLevelNodeId)) {
+                                allDataRelations.remove(i);
+                                size--;
+                                continue;
+                            }
+
+                            originalIds.add(relationship.firstLevelNodeId);
+                        }
+
+                        i++;
+                    }
+
+                    for (String selectedId :
+                            selectedIds) {
+                        if (!originalIds.contains(selectedId)) {
+                            Relationship relationship = new Relationship();
+                            relationship.firstLevelNodeId = selectedId;
+                            allDataRelations.add(relationship);
+                        }
+                    }
+
+                    MainActivity.saveAllDatas();
+
+                    break;
+                }
+
+                default: {
+                    break;
+                }
             }
         }
     }
