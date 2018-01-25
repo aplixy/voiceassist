@@ -44,6 +44,8 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends BaseActivity implements EasyPermissions.PermissionCallbacks {
 
+    private static final String TAG = "MainActivity";
+
     private static final int RC_STORAGE_PERMISSION = 0x100;
 
     private static final int PAGE_SIZE = 9;
@@ -106,7 +108,6 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                 } else if (null != vo.node){
                     mTvFirstLevelName.setText(vo.node.cnName);
                 }
-
 
                 if (null != vo.relationship && null != vo.relationship.secondLevelNodes && vo.relationship.secondLevelNodes.size() > 0) {
                     mPagerPointerSecondLevel.setVisibility(View.VISIBLE);
@@ -237,21 +238,26 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         return gridView;
     }
 
-
     private <T extends INodeId> ArrayList<View> getPagers(List<T> noteIdList) {
         if (null == noteIdList) return null;
 
+
         ArrayList<View> views = new ArrayList<>();
-        List<GridViewVo> onePageData = null;
+        List<GridViewVo> onePageData = new ArrayList<>();
 
         int nodeType = -1;
+        int onePageSize = -1;
 
         for (INodeId nodeIdEntity : noteIdList) {
             if (null == nodeIdEntity) continue;
 
-            if (null != onePageData && onePageData.size() >= PAGE_SIZE) {
+            if (-1 == nodeType) nodeType = nodeIdEntity.getNodeType();
 
-                if (-1 == nodeType) nodeType = nodeIdEntity.getNodeType();
+            onePageSize = onePageData.size();
+
+            // 在最一开始先生成ViewPager的一个新View，后续再给onePageData填数据进去
+            if (onePageSize == 0 || onePageSize >= PAGE_SIZE) {
+                if (onePageSize > 0) onePageData = new ArrayList<>();
 
                 View view = null;
                 if (INodeId.NODE_TYPE_FIRST_LEVEL == nodeType) {
@@ -260,14 +266,11 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                     view = getOnePageSecondLevel(onePageData);
                 }
                 if (null != view) views.add(view);
-
-                onePageData = new ArrayList<>();
             }
 
+            // 给onePageData加一个节点
             Node node = mNodesMap.get(nodeIdEntity.getNodeId());
-            if (null == node) continue;
-
-            if (null == onePageData) onePageData = new ArrayList<>();
+            if (null == node) continue;// 节点为空则不加数据
 
             Relationship relationship = null;
             if (nodeIdEntity instanceof Relationship) {
@@ -275,17 +278,6 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             }
             onePageData.add(new GridViewVo(node, relationship));
 
-        }
-
-        if (noteIdList.size() % PAGE_SIZE != 0) {
-            View view = null;
-            if (INodeId.NODE_TYPE_FIRST_LEVEL == nodeType) {
-                view = getOnePageFirstLevel(onePageData);
-            } else if (INodeId.NODE_TYPE_SECOND_LEVEL == nodeType) {
-                view = getOnePageSecondLevel(onePageData);
-            }
-
-            if (null != view) views.add(view);
         }
 
         return views;

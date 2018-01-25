@@ -174,7 +174,7 @@ public class FileUtils {
             while ((line = reader.readLine()) != null) {
                 if (null == sb) sb = new StringBuilder();
 
-                sb.append(line);
+                sb.append(line.trim().replaceAll(" ", ""));
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
