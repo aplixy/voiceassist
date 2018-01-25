@@ -367,7 +367,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                 //System.exit(0);
             } else {
                 mExitFlag = CAN_EXIT_FLAG;
-                Observable.timer(3, TimeUnit.SECONDS).subscribe(mExitConsumer);
+                Observable.timer(2, TimeUnit.SECONDS).subscribe(mExitConsumer);
                 ToastUtils.showToast("再按一次退出应用");
             }
 

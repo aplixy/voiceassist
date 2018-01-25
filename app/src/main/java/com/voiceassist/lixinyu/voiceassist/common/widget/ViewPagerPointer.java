@@ -21,7 +21,7 @@ import com.voiceassist.lixinyu.voiceassist.R;
  */
 public class ViewPagerPointer extends View {
 	
-	private int MAX_COUNT = 4;
+	private int MAX_COUNT = 10;
 
 	private ViewPager mViewPager;
 	private int mScrollState;

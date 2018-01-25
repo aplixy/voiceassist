@@ -4,6 +4,7 @@ import android.app.Application;
 import android.os.Environment;
 
 import com.tencent.bugly.Bugly;
+import com.tencent.bugly.BuglyStrategy;
 import com.tencent.bugly.beta.Beta;
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
@@ -17,7 +18,7 @@ public class AssistApplication extends Application {
     protected static AssistApplication mApplication;
 
     public static final String APP_ID = "9cf0826f88"; // TODO 替换成bugly上注册的appid
-    public static final String APP_CHANNEL = "DEBUG"; // TODO 自定义渠道
+    public static final String APP_CHANNEL = "bate"; // TODO 自定义渠道
     private static final String TAG = "OnUILifecycleListener";
 
     @Override
@@ -204,7 +205,7 @@ public class AssistApplication extends Application {
          * 参数2：appId
          * 参数3：是否开启debug
          */
-        Bugly.init(getApplicationContext(), APP_ID, false);
+        //Bugly.init(getApplicationContext(), APP_ID, false);
 
 
         /**
@@ -212,13 +213,13 @@ public class AssistApplication extends Application {
          */
 
         /***** Bugly高级设置 *****/
-        //        BuglyStrategy strategy = new BuglyStrategy();
+                BuglyStrategy strategy = new BuglyStrategy();
         /**
          * 设置app渠道号
          */
-        //        strategy.setAppChannel(APP_CHANNEL);
+                strategy.setAppChannel(APP_CHANNEL);
 
-        //        Bugly.init(getApplicationContext(), APP_ID, true, strategy);
+                Bugly.init(getApplicationContext(), APP_ID, false, strategy);
     }
 
 
