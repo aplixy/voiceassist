@@ -234,4 +234,41 @@ public class FileUtils {
     }
 
 
+    public static void saveTextToFile(String text, String filePath) {
+
+        File file = new File(filePath);
+        if (!file.exists()) {//如果文件夹不存在，则创建新的文件夹
+            file.getParentFile().mkdirs();
+        }
+
+        FileWriter fw = null;
+        BufferedWriter bw  = null;
+
+        try {
+
+            fw = new FileWriter(file);
+
+            bw  = new BufferedWriter(fw);
+
+            bw.write(text);
+
+            bw.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (null != bw) try {
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (null != fw) try {
+                fw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 }

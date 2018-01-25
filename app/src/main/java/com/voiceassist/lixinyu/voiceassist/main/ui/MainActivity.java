@@ -59,10 +59,14 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private static final int CAN_ENTER_FLAG = 2;
     private static final int IDLE_FLAG = -1;
 
+    private String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+    private static final int REQ_EDIT_DATA = 0x100;
+
     public static AllData mAllData;
 
 
-    private String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
 
     private ViewPager mViewPagerFirstLevel;
     private ViewPager mViewPagerSecondLevel;
@@ -170,7 +174,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                     mTempEnterFlag++;
                     if (mTempEnterFlag == CAN_ENTER_FLAG) {
                         // Enter
-                        startActivity(mEditIntent);
+                        startActivityForResult(mEditIntent, REQ_EDIT_DATA);
                     } else {
                         if (null != mEnterDisposable) mEnterDisposable.dispose();
                         mEnterDisposable = Observable.timer(1, TimeUnit.SECONDS).subscribe(mTempEnterConsumer);
@@ -271,6 +275,10 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
         mPagerPointerFirstLevel.setViewPager(mViewPagerFirstLevel);
 
+
+        mPagerAdapterSecondLevel = new MainPagerAdapter(new ArrayList<View>());
+        mViewPagerSecondLevel.setAdapter(mPagerAdapterSecondLevel);
+        mPagerPointerSecondLevel.setViewPager(mViewPagerSecondLevel);
     }
 
 
@@ -344,6 +352,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     }
 
 
+
+
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
 
@@ -408,9 +418,21 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
-            // Do something after user returned from app settings screen, like showing a Toast.
-            getData();
+        switch (requestCode) {
+            case AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE: {
+                // Do something after user returned from app settings screen, like showing a Toast.
+                getData();
+                break;
+            }
+
+            case REQ_EDIT_DATA: {
+                renderView(mAllData);
+                break;
+            }
+
+            default: {
+                break;
+            }
         }
     }
 }

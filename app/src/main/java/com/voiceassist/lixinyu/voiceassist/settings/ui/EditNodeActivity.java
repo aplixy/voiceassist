@@ -10,11 +10,14 @@ import android.widget.Button;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
+import com.voiceassist.lixinyu.voiceassist.common.Constants;
 import com.voiceassist.lixinyu.voiceassist.common.widget.RecyclerViewDivider;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
 import com.voiceassist.lixinyu.voiceassist.settings.adapter.NodeListAdapter;
 import com.voiceassist.lixinyu.voiceassist.settings.dialog.EditNodeDialog;
+import com.voiceassist.lixinyu.voiceassist.utils.FileUtils;
+import com.voiceassist.lixinyu.voiceassist.utils.JsonUtils;
 
 import java.util.List;
 
@@ -97,5 +100,8 @@ public class EditNodeActivity extends BaseActivity implements EditNodeDialog.OnP
         }
 
         mAdapter.notifyDataSetChanged();
+
+        String jsonData = JsonUtils.getJsonFromObject(MainActivity.mAllData);
+        FileUtils.saveTextToFile(jsonData, Constants.JSON_DATA_PATH);
     }
 }
