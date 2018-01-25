@@ -98,6 +98,10 @@ public class EditNodeActivity extends BaseActivity implements EditNodeDialog.OnP
             mNodeList.add(node);
         }
 
+        MainActivity.mNodesMap.put(node.id, node);
+
+
+
         mAdapter.notifyDataSetChanged();
 
         MainActivity.saveAllDatas();
