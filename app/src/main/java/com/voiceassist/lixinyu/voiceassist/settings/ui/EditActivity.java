@@ -35,14 +35,21 @@ public class EditActivity extends BaseActivity {
     }
 
     private void initData() {
+        setTitle("编辑节点与关系图");
     }
 
     private void initListener() {
         mBtnEditNode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(EditActivity.this, EditNodeActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(EditActivity.this, EditNodeActivity.class));
+            }
+        });
+
+        mBtnEditRelationship.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(EditActivity.this, EditRelationshipActivity.class));
             }
         });
     }

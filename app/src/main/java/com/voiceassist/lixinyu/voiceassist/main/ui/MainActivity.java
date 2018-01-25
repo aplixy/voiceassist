@@ -78,7 +78,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private LoadingDialog mLoadingDialog;
 
 
-    private ArrayMap<String, Node> mNodesMap;
+    public static ArrayMap<String, Node> mNodesMap;
 
     private GridAdapter.OnItemClickListener mOnFirstLevelClickListener;
 
@@ -309,7 +309,6 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private <T extends INodeId> ArrayList<View> getPagers(List<T> noteIdList) {
         if (null == noteIdList) return null;
 
-
         ArrayList<View> views = new ArrayList<>();
         List<GridViewVo> onePageData = new ArrayList<>();
 
@@ -324,7 +323,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             onePageSize = onePageData.size();
 
             // 在最一开始先生成ViewPager的一个新View，后续再给onePageData填数据进去
-            if (onePageSize == 0 || onePageSize >= PAGE_SIZE) {
+            if (views.size() == 0 || onePageSize >= PAGE_SIZE) {
                 if (onePageSize > 0) onePageData = new ArrayList<>();
 
                 View view = null;
@@ -334,6 +333,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                     view = getOnePageSecondLevel(onePageData);
                 }
                 if (null != view) views.add(view);
+
             }
 
             // 给onePageData加一个节点
@@ -345,6 +345,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                 relationship = (Relationship) nodeIdEntity;
             }
             onePageData.add(new GridViewVo(node, relationship));
+
 
         }
 
@@ -369,6 +370,11 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    public static void saveAllDatas() {
+        String jsonData = JsonUtils.getJsonFromObject(MainActivity.mAllData);
+        FileUtils.saveTextToFile(jsonData, Constants.JSON_DATA_PATH);
     }
 
 
