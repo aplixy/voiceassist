@@ -257,7 +257,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         }
 
         if (null != rawAllData && null != sdCardAllData) {
-            if (allData.version > sdCardAllData.version) {
+            if (rawAllData.version > sdCardAllData.version) {
                 allData = rawAllData;
                 FileUtils.copyFilesFromRawNoSpace(AssistApplication.getInstance(), R.raw.json_data, filePath);
             } else {
