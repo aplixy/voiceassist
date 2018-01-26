@@ -1,7 +1,8 @@
 {
+	version:1,
 	"nodes": [{
 		"audioPath": "record/due.m4a",
-		"cnName": "肚饿",
+		"cnName": "肚饿new",
 		"icon": "",
 		"id": "due"
 	}, {

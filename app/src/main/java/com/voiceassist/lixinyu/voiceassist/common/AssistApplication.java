@@ -18,7 +18,7 @@ public class AssistApplication extends Application {
     protected static AssistApplication mApplication;
 
     public static final String APP_ID = "9cf0826f88"; // TODO 替换成bugly上注册的appid
-    public static final String APP_CHANNEL = "bate"; // TODO 自定义渠道
+    public static final String APP_CHANNEL = "release"; // TODO 自定义渠道
     private static final String TAG = "OnUILifecycleListener";
 
     @Override

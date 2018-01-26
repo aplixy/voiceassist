@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.entity.vo.NodeSelectVo;
-import com.voiceassist.lixinyu.voiceassist.utils.KGLog;
 
 import java.util.List;
 
@@ -63,15 +62,10 @@ public class NodeSelectionAdapter extends RecyclerView.Adapter<NodeSelectionAdap
     @Override
     public void onClick(View v) {
         int position = (int) v.getTag();
-        KGLog.d("position--->" + position);
 
         NodeSelectVo vo = mData.get(position);
-
-        KGLog.i("vo--->" + vo);
-
         if (null != vo) {
             vo.isSelected = !vo.isSelected;
-            KGLog.v("vo.isSelected--->" + vo.isSelected);
             notifyDataSetChanged();
         }
     }

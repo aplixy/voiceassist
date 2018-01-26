@@ -1,7 +1,4 @@
-package com.voiceassist.lixinyu.voiceassist.entity.vo;
-
-import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
-import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
+package com.voiceassist.lixinyu.voiceassist.entity.dto;
 
 import java.io.Serializable;
 import java.util.List;
@@ -11,6 +8,8 @@ import java.util.List;
  */
 
 public class AllData implements Serializable {
+
+    public int version;
 
     public List<Node> nodes;
     public List<Relationship> relationship;

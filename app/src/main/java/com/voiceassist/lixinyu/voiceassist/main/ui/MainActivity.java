@@ -18,10 +18,11 @@ import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
 import com.voiceassist.lixinyu.voiceassist.common.Constants;
 import com.voiceassist.lixinyu.voiceassist.common.widget.LoadingDialog;
 import com.voiceassist.lixinyu.voiceassist.common.widget.ViewPagerPointer;
+import com.voiceassist.lixinyu.voiceassist.entity.dto.AllData;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.INodeId;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
-import com.voiceassist.lixinyu.voiceassist.entity.vo.AllData;
+import com.voiceassist.lixinyu.voiceassist.entity.dto.SecondLevelNode;
 import com.voiceassist.lixinyu.voiceassist.entity.vo.GridViewVo;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapter;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterFirstLevel;
@@ -30,7 +31,6 @@ import com.voiceassist.lixinyu.voiceassist.main.adapter.MainPagerAdapter;
 import com.voiceassist.lixinyu.voiceassist.settings.ui.EditActivity;
 import com.voiceassist.lixinyu.voiceassist.utils.FileUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.JsonUtils;
-import com.voiceassist.lixinyu.voiceassist.utils.KGLog;
 import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
 
 import java.util.ArrayList;
@@ -51,50 +51,44 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private static final String TAG = "MainActivity";
 
-    private static final int RC_STORAGE_PERMISSION = 0x100;
-
     private static final int PAGE_SIZE = 9;
 
     private static final int CAN_EXIT_FLAG = 0x100;
     private static final int CAN_ENTER_FLAG = 2;
     private static final int IDLE_FLAG = -1;
 
-    private String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private static final int RC_STORAGE_PERMISSION = 0x100;
+    private static final String[] PERMS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private static final int REQ_EDIT_DATA = 0x100;
 
     public static AllData mAllData;
+    public static ArrayMap<String, Node> mNodesMap;
 
+    private ViewPager mLevel1ViewPager;
+    private ViewPager mLevel2ViewPager;
+    private TextView mTvLevel1Name;
 
-
-
-    private ViewPager mViewPagerFirstLevel;
-    private ViewPager mViewPagerSecondLevel;
-    private TextView mTvFirstLevelName;
-
-    private MainPagerAdapter mPagerAdapterFirstLevel;
-    private MainPagerAdapter mPagerAdapterSecondLevel;
+    private MainPagerAdapter mLevel1PagerAdapter;
+    private MainPagerAdapter mLevel2PagerAdapter;
 
     private LoadingDialog mLoadingDialog;
 
-
-    public static ArrayMap<String, Node> mNodesMap;
-
     private GridAdapter.OnItemClickListener mOnFirstLevelClickListener;
 
-    private ViewPagerPointer mPagerPointerFirstLevel;
-    private ViewPagerPointer mPagerPointerSecondLevel;
+    private ViewPagerPointer mLevel1PagerPointer;
+    private ViewPagerPointer mLevel2PagerPointer;
 
     private Consumer<Long> mExitConsumer;
-    private Consumer<Long> mTempEnterConsumer;
-
-    private Disposable mEnterDisposable;
+    private Consumer<Long> mTempSettingConsumer;
+    private Disposable mSettingDisposable;
 
     private int mExitFlag = IDLE_FLAG;
-    private int mTempEnterFlag = IDLE_FLAG;
+    private int mTempSettingFlag = IDLE_FLAG;
 
 
-    private Intent mEditIntent;
 
 
     @Override
@@ -112,14 +106,14 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
 
     private void initViews() {
-        mViewPagerFirstLevel = findViewById(R.id.main_viewpager_first_level);
-        mViewPagerSecondLevel = findViewById(R.id.main_viewpager_second_level);
-        mTvFirstLevelName = findViewById(R.id.main_textview_first_level_name);
+        mLevel1ViewPager = findViewById(R.id.main_viewpager_first_level);
+        mLevel2ViewPager = findViewById(R.id.main_viewpager_second_level);
+        mTvLevel1Name = findViewById(R.id.main_textview_first_level_name);
 
         mLoadingDialog = new LoadingDialog(this);
 
-        mPagerPointerFirstLevel = findViewById(R.id.main_pager_indicator_first_level);
-        mPagerPointerSecondLevel = findViewById(R.id.main_pager_indicator_second_level);
+        mLevel1PagerPointer = findViewById(R.id.main_pager_indicator_first_level);
+        mLevel2PagerPointer = findViewById(R.id.main_pager_indicator_second_level);
     }
 
     private void initData() {
@@ -132,15 +126,14 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             }
         };
 
-        mTempEnterConsumer = new Consumer<Long>() {
+        mTempSettingConsumer = new Consumer<Long>() {
             @Override
             public void accept(Long aLong) throws Exception {
-                mEnterDisposable = null;
-                mTempEnterFlag = IDLE_FLAG;
+                mSettingDisposable = null;
+                mTempSettingFlag = IDLE_FLAG;
             }
         };
 
-        mEditIntent = new Intent(MainActivity.this, EditActivity.class);
     }
 
     private void initListener() {
@@ -149,37 +142,33 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             public void onClick(int position, GridViewVo vo) {
 
                 if (null != vo.node) {
-                    mTvFirstLevelName.setText(vo.node.cnName);
+                    mTvLevel1Name.setText(vo.node.cnName);
                 }
 
-                if (null == vo || null == vo.relationship || null == vo.relationship.secondLevelNodes) {
-                    return;
-                }
-
-                if (null != vo.relationship && null != vo.relationship.secondLevelNodes && vo.relationship.secondLevelNodes.size() > 0) {
-                    mPagerPointerSecondLevel.setVisibility(View.VISIBLE);
+                List<SecondLevelNode> secondLevelNodes = null;
+                if (null != vo && null != vo.relationship && null != vo.relationship.secondLevelNodes && vo.relationship.secondLevelNodes.size() > 0) {
+                    mLevel2PagerPointer.setVisibility(View.VISIBLE);
+                    secondLevelNodes = vo.relationship.secondLevelNodes;
                 } else {
-                    mPagerPointerSecondLevel.setVisibility(View.INVISIBLE);
+                    mLevel2PagerPointer.setVisibility(View.INVISIBLE);
                 }
 
-                mPagerAdapterSecondLevel = new MainPagerAdapter(getPagers(vo.relationship.secondLevelNodes));
-                mViewPagerSecondLevel.setAdapter(mPagerAdapterSecondLevel);
-                mPagerPointerSecondLevel.setViewPager(mViewPagerSecondLevel);
+                mLevel2ViewPager.setAdapter(new MainPagerAdapter(getPagers(secondLevelNodes)));
+                mLevel2PagerPointer.setViewPager(mLevel2ViewPager);
             }
         };
 
-        mTvFirstLevelName.setOnClickListener(new View.OnClickListener() {
+        mTvLevel1Name.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (mTempEnterFlag < CAN_ENTER_FLAG) {
-                    mTempEnterFlag++;
-                    if (mTempEnterFlag == CAN_ENTER_FLAG) {
+                if (mTempSettingFlag < CAN_ENTER_FLAG) {
+                    mTempSettingFlag++;
+                    if (mTempSettingFlag == CAN_ENTER_FLAG) {
                         // Enter
-                        startActivityForResult(mEditIntent, REQ_EDIT_DATA);
+                        startActivityForResult(new Intent(MainActivity.this, EditActivity.class), REQ_EDIT_DATA);
                     } else {
-                        if (null != mEnterDisposable) mEnterDisposable.dispose();
-                        mEnterDisposable = Observable.timer(1, TimeUnit.SECONDS).subscribe(mTempEnterConsumer);
+                        if (null != mSettingDisposable) mSettingDisposable.dispose();
+                        mSettingDisposable = Observable.timer(1, TimeUnit.SECONDS).subscribe(mTempSettingConsumer);
                     }
                 }
             }
@@ -190,11 +179,10 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
 
     private void getData() {
-        if (EasyPermissions.hasPermissions(this, perms)) {
+        if (EasyPermissions.hasPermissions(this, PERMS)) {
             getDataAsync();
         } else {
-            KGLog.i("请求权限");
-            EasyPermissions.requestPermissions(this, "需要您允许存储权限", RC_STORAGE_PERMISSION, perms);
+            EasyPermissions.requestPermissions(this, "需要您允许存储权限", RC_STORAGE_PERMISSION, PERMS);
         }
     }
 
@@ -243,71 +231,57 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     }
 
     private AllData getDataSync(String filePath) {
-        String str = null;
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            str = FileUtils.readFileSingleLine(filePath);
+        String sdCardStr = null;
+        String rawStr = FileUtils.readRawNoSpace(AssistApplication.getInstance(), R.raw.json_data);
 
-            KGLog.d("读取Sd卡结果--->" + str);
+        AllData rawAllData = null;
+        AllData sdCardAllData = null;
+        AllData allData = null;
 
-            if (null == str) {
+        if (EasyPermissions.hasPermissions(this, PERMS)) {
+            sdCardStr = FileUtils.readFileSingleLine(filePath);
+
+            if (null == sdCardStr) {
                 FileUtils.copyFilesFromRawNoSpace(AssistApplication.getInstance(), R.raw.json_data, filePath);
-                str = FileUtils.readFileSingleLine(filePath);
-                KGLog.i("初次复制数据--->" + str);
+                sdCardStr = rawStr;
+
+                if (null != rawStr) return JsonUtils.getObjectFromJson(rawStr, AllData.class);
             }
-        } else {
-            KGLog.w("未获取到权限，取备用数据");
-            str = FileUtils.readRawNoSpace(AssistApplication.getInstance(), R.raw.json_data);
-            KGLog.w("raw数据--->" + str);
         }
 
-        if (null != str) {
-            return JsonUtils.getObjectFromJson(str, AllData.class);
+        if (null != sdCardStr) {
+            allData = sdCardAllData = JsonUtils.getObjectFromJson(sdCardStr, AllData.class);
         }
 
-        return null;
+        if (null != rawStr) {
+            allData = rawAllData = JsonUtils.getObjectFromJson(rawStr, AllData.class);
+        }
+
+        if (null != rawAllData && null != sdCardAllData) {
+            allData = rawAllData;
+            if (allData.version < sdCardAllData.version) allData = sdCardAllData;
+            else if (allData.version > sdCardAllData.version) FileUtils.copyFilesFromRawNoSpace(AssistApplication.getInstance(), R.raw.json_data, filePath);
+        }
+
+        return allData;
     }
 
     private void renderView(AllData allData) {
-        if (null == allData) return;
-
         mAllData = allData;
 
-        mPagerAdapterFirstLevel = new MainPagerAdapter(getPagers(allData.relationship));
-        mViewPagerFirstLevel.setAdapter(mPagerAdapterFirstLevel);
+        List<Relationship> relationshipList = null;
+        if (null != allData) relationshipList = allData.relationship;
 
-        mPagerPointerFirstLevel.setViewPager(mViewPagerFirstLevel);
+        // 渲染一级菜单
+        mLevel1ViewPager.setAdapter(new MainPagerAdapter(getPagers(relationshipList)));
+        mLevel1PagerPointer.setViewPager(mLevel1ViewPager);
 
+        // 渲染二级菜单
+        mLevel2ViewPager.setAdapter(new MainPagerAdapter(null));
+        mLevel2PagerPointer.setViewPager(mLevel2ViewPager);
 
-        mPagerAdapterSecondLevel = new MainPagerAdapter(new ArrayList<View>());
-        mViewPagerSecondLevel.setAdapter(mPagerAdapterSecondLevel);
-        mPagerPointerSecondLevel.setViewPager(mViewPagerSecondLevel);
-
-        mTvFirstLevelName.setText("请点击以上按钮");
-    }
-
-
-    private View getOnePageFirstLevel(List<GridViewVo> data) {
-        GridView gridView = new GridView(this);
-
-        gridView.setHorizontalSpacing(9);
-        gridView.setVerticalSpacing(9);
-        gridView.setNumColumns(3);
-        GridAdapter adapter = new GridAdapterFirstLevel(this, data, 3);
-        adapter.setOnItemClickListener(mOnFirstLevelClickListener);
-        gridView.setAdapter(adapter);
-
-        return gridView;
-    }
-
-    private View getOnePageSecondLevel(List<GridViewVo> data) {
-        GridView gridView = new GridView(this);
-
-        gridView.setHorizontalSpacing(9);
-        gridView.setVerticalSpacing(9);
-        gridView.setNumColumns(3);
-        gridView.setAdapter(new GridAdapterSecondLevel(this, data, 3));
-
-        return gridView;
+        // 初始化指示器
+        mTvLevel1Name.setText("请点击以上按钮");
     }
 
     private <T extends INodeId> ArrayList<View> getPagers(List<T> noteIdList) {
@@ -332,9 +306,9 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
                 View view = null;
                 if (INodeId.NODE_TYPE_FIRST_LEVEL == nodeType) {
-                    view = getOnePageFirstLevel(onePageData);
+                    view = getLevel1OnePage(onePageData);
                 } else if (INodeId.NODE_TYPE_SECOND_LEVEL == nodeType) {
-                    view = getOnePageSecondLevel(onePageData);
+                    view = getLevel2OnePage(onePageData);
                 }
                 if (null != view) views.add(view);
 
@@ -349,16 +323,46 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                 relationship = (Relationship) nodeIdEntity;
             }
             onePageData.add(new GridViewVo(node, relationship));
-
-
-        }
+        }// for循环结束
 
         return views;
     }
 
 
+    private View getLevel1OnePage(List<GridViewVo> data) {
+        GridView gridView = new GridView(this);
+
+        gridView.setHorizontalSpacing(9);
+        gridView.setVerticalSpacing(9);
+        gridView.setNumColumns(3);
+        GridAdapter adapter = new GridAdapterFirstLevel(this, data, 3);
+        adapter.setOnItemClickListener(mOnFirstLevelClickListener);
+        gridView.setAdapter(adapter);
+
+        return gridView;
+    }
+
+    private View getLevel2OnePage(List<GridViewVo> data) {
+        GridView gridView = new GridView(this);
+
+        gridView.setHorizontalSpacing(9);
+        gridView.setVerticalSpacing(9);
+        gridView.setNumColumns(3);
+        gridView.setAdapter(new GridAdapterSecondLevel(this, data, 3));
+
+        return gridView;
+    }
 
 
+    public static void saveAllDatas() {
+        String jsonData = JsonUtils.getJsonFromObject(MainActivity.mAllData);
+        FileUtils.saveTextToFile(jsonData, Constants.JSON_DATA_PATH);
+
+        ToastUtils.showToast("编辑生效");
+    }
+
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
 
@@ -376,12 +380,6 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         return super.onKeyDown(keyCode, event);
     }
 
-    public static void saveAllDatas() {
-        String jsonData = JsonUtils.getJsonFromObject(MainActivity.mAllData);
-        FileUtils.saveTextToFile(jsonData, Constants.JSON_DATA_PATH);
-
-        ToastUtils.showToast("编辑生效");
-    }
 
 
     // ========= API 23 permissions granted =========
@@ -408,13 +406,12 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     @Override
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        KGLog.d("request code--->" + requestCode);
         switch (requestCode) {
             case RC_STORAGE_PERMISSION: {
                 // (Optional) Check whether the user denied any permissions and checked "NEVER ASK AGAIN."
                 // This will display a dialog directing them to enable the permission in app settings.
                 if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-                    new AppSettingsDialog.Builder(this).build().show();
+                    new AppSettingsDialog.Builder(this).build().show();// 用户选择『不开提示』时引导用户手动开启权限
                 } else {
                     getDataAsync();
                 }
@@ -431,7 +428,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE: {
+            case AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE: {// 用户手动开启权限后调用
                 // Do something after user returned from app settings screen, like showing a Toast.
                 getData();
                 break;
