@@ -3,7 +3,7 @@
     android:shape="rectangle">
     <solid android:color="@android:color/transparent" />
     <stroke
-        android:width="2dp"
+        android:width="1dip"
         android:color="@color/colorButtonStroke"
         android:dashGap="0.0dip"
         android:dashWidth="3.0dip" />

@@ -71,9 +71,6 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private ViewPager mLevel2ViewPager;
     private TextView mTvLevel1Name;
 
-    private MainPagerAdapter mLevel1PagerAdapter;
-    private MainPagerAdapter mLevel2PagerAdapter;
-
     private LoadingDialog mLoadingDialog;
 
     private GridAdapter.OnItemClickListener mOnFirstLevelClickListener;

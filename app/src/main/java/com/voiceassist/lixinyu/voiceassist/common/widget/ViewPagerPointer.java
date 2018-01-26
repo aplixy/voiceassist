@@ -20,8 +20,14 @@ import com.voiceassist.lixinyu.voiceassist.R;
  * @author xinyuli
  */
 public class ViewPagerPointer extends View {
+
+	private static final String TAG = "ViewPagerPointer";
+
+	private static final int DEFAULT_MAX_COUNT = 20;
+	private static final int INIT_PADDING = 0;
 	
-	private int MAX_COUNT = 10;
+	private int maxCount;
+	private int maxCountBackup;
 
 	private ViewPager mViewPager;
 	private int mScrollState;
@@ -40,7 +46,12 @@ public class ViewPagerPointer extends View {
 	private int colorBg;
 	private int colorIndicator;
 	
-	private String tag = "indicator";
+	private PagerAdapter mPreviousPagerAdapter;
+
+	private int widthSpecMode;
+	private int heightSpecMode;
+
+
 
 	public ViewPagerPointer(Context context) {
 		this(context, null);
@@ -63,8 +74,8 @@ public class ViewPagerPointer extends View {
         colorIndicator = a.getColor(R.styleable.ViewPagerPointer_colorIndicatorPoint, Color.parseColor("#E6E6E6"));
         colorBg = a.getColor(R.styleable.ViewPagerPointer_colorBgPoint, Color.parseColor("#FFFFFF"));
         pointSize = a.getDimension(R.styleable.ViewPagerPointer_pointSize, 17);
-        pointPadding = a.getDimension(R.styleable.ViewPagerPointer_pointPadding, 27);
-        MAX_COUNT = a.getInt(R.styleable.ViewPagerPointer_maxCount, 4);
+        pointPadding = a.getDimension(R.styleable.ViewPagerPointer_pointPadding, 23);
+		maxCountBackup = maxCount = a.getInt(R.styleable.ViewPagerPointer_maxCount, DEFAULT_MAX_COUNT);
         
         a.recycle();
 		
@@ -120,7 +131,7 @@ public class ViewPagerPointer extends View {
         
         
         float width;
-        final int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+        widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
         if (widthSpecMode == MeasureSpec.EXACTLY) {
             //We were told how big to be
         	width = MeasureSpec.getSize(widthMeasureSpec);
@@ -131,7 +142,7 @@ public class ViewPagerPointer extends View {
 
         //Determine our height
         float height;
-        final int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+        heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
         if (heightSpecMode == MeasureSpec.EXACTLY) {
             //We were told how big to be
             height = MeasureSpec.getSize(heightMeasureSpec);
@@ -139,32 +150,63 @@ public class ViewPagerPointer extends View {
             //Calculate the text bounds
         	height = pointSize;
         }
-        final int measuredHeight = (int)height;
-        final int measuredWidth = (int)width;
+
+		int measuredWidth = (int)width;
+		int measuredHeight = (int)height;
 
         setMeasuredDimension(measuredWidth, measuredHeight);
     }
 
-	public void setViewPager(ViewPager view) {
-		if (mViewPager == view) {
-			return;
+    private void retrySize() {
+		if (MeasureSpec.EXACTLY == widthSpecMode && MeasureSpec.EXACTLY == heightSpecMode) return;;
+
+		float width = 0;
+		float height = 0;
+
+		if (MeasureSpec.EXACTLY != widthSpecMode) {
+			width = pointSize * count + pointPadding * (count - 1);
 		}
+
+		if (MeasureSpec.EXACTLY != heightSpecMode) {
+			height = pointSize;
+		}
+
+		int measuredWidth = (int)width;
+		int measuredHeight = (int)height;
+
+		setMeasuredDimension(measuredWidth, measuredHeight);
+	}
+
+	public void setViewPager(ViewPager view) {
+		if (mViewPager != view) {
+			maxCount = maxCountBackup;
+		}
+
 		if (mViewPager != null) {
 			mViewPager.setOnPageChangeListener(null);
+
 		}
-		if (view.getAdapter() == null) {
+
+		PagerAdapter pagerAdapter = view.getAdapter();
+		if (pagerAdapter == null) {
 			throw new IllegalStateException(
 					"ViewPager does not have adapter instance.");
 		}
+
+		if (mPreviousPagerAdapter != pagerAdapter) {
+			maxCount = maxCountBackup;
+		}
+
+		mPreviousPagerAdapter = pagerAdapter;
 		
 		mViewPager = view;
 		
-		PagerAdapter pagerAdapter = mViewPager.getAdapter();
 		count = pagerAdapter.getCount();
-		if(count > MAX_COUNT) count  = MAX_COUNT;
-		else if(count < MAX_COUNT) MAX_COUNT = count;
+		if(count > maxCount) count  = maxCount;
+		else if(count < maxCount) maxCount = count;
 
-		if (0 == MAX_COUNT) return;
+
+		if (0 == maxCount) return;
 		
 		mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
 			@Override
@@ -179,7 +221,7 @@ public class ViewPagerPointer extends View {
 			@Override
 			public void onPageScrolled(int position, float positionOffset,
 					int positionOffsetPixels) {
-				mCurrentPage = position % MAX_COUNT;
+				mCurrentPage = position % maxCount;
 				//KGLog.d("mCurrentPage--->" + mCurrentPage);
 				mPageOffset = positionOffset;
 				
@@ -194,7 +236,7 @@ public class ViewPagerPointer extends View {
 			@Override
 			public void onPageSelected(int position) {
 				if (mScrollState == ViewPager.SCROLL_STATE_IDLE) {
-					mCurrentPage = position % MAX_COUNT;
+					mCurrentPage = position % maxCount;
 					
 					//KGLog.i("mCurrentPage--->" + mCurrentPage);
 					invalidate();
@@ -206,17 +248,19 @@ public class ViewPagerPointer extends View {
 			}
 		});
 		invalidate();
+
+		//retrySize();
 	}
 	
 
 
 	public int getMaxCount() {
-		return MAX_COUNT;
+		return maxCount;
 	}
 
 	public void setMaxCount(int maxCount) {
-		if(maxCount > 10) maxCount = 10;
-		MAX_COUNT = maxCount;
+		if(maxCount > DEFAULT_MAX_COUNT) maxCount = DEFAULT_MAX_COUNT;
+		this.maxCount = maxCount;
 	}
 	
 	public void setOnPageChangeListener(OnPageChangeListener l){
