@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.KeyEvent;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
@@ -89,11 +88,17 @@ public class NodeSelectionActivity extends BaseActivity {
         setResult(RESULT_OK, new Intent().putExtra("selected_node_list", selectedList));
     }
 
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-            setResult();
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+//            setResult();
+//
+//        }
+//        return super.onKeyDown(keyCode, event);
+//    }
 
-        }
-        return super.onKeyDown(keyCode, event);
+    @Override
+    protected void onFinishCalled() {
+        //KGLog.d("onFinishCalled");
+        setResult();
     }
 }

@@ -118,46 +118,47 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (RESULT_OK == resultCode)
-        switch (requestCode) {
-            case REQ_ADD_NODE: {
-                List<Node> selectedNodeList = (List<Node>) data.getSerializableExtra("selected_node_list");
-                mNodeList.clear();
-                mNodeList.addAll(selectedNodeList);
-                mAdapter.notifyDataSetChanged();
+        if (RESULT_OK == resultCode) {
+            switch (requestCode) {
+                case REQ_ADD_NODE: {
+                    List<Node> selectedNodeList = (List<Node>) data.getSerializableExtra("selected_node_list");
+                    mNodeList.clear();
+                    mNodeList.addAll(selectedNodeList);
+                    mAdapter.notifyDataSetChanged();
 
-                List<SecondLevelNode> secondLevelNodes = new ArrayList<>();
-                for (Node node : selectedNodeList) {
-                    if (null == node) continue;
+                    List<SecondLevelNode> secondLevelNodes = new ArrayList<>();
+                    for (Node node : selectedNodeList) {
+                        if (null == node) continue;
 
-                    SecondLevelNode secondLevelNode = new SecondLevelNode();
-                    secondLevelNode.secondLevelNodeId = node.id;
+                        SecondLevelNode secondLevelNode = new SecondLevelNode();
+                        secondLevelNode.secondLevelNodeId = node.id;
 
-                    secondLevelNodes.add(secondLevelNode);
-                }
-
-                //KGLog.d("要找的一级节点--->" + mRelationship.firstLevelNodeId);
-
-                for (Relationship relationship : MainActivity.mAllData.relationship) {
-                    if (null == relationship) continue;
-
-                    //KGLog.i("内存中的一级节点--->" + relationship.firstLevelNodeId);
-
-                    if (relationship.firstLevelNodeId.equals(mRelationship.firstLevelNodeId)) {
-                        relationship.secondLevelNodes = secondLevelNodes;
-                        //KGLog.d("relationship.secondLevelNodes--->" + relationship.secondLevelNodes.size());
-                        break;
+                        secondLevelNodes.add(secondLevelNode);
                     }
+
+                    //KGLog.d("要找的一级节点--->" + mRelationship.firstLevelNodeId);
+
+                    for (Relationship relationship : MainActivity.mAllData.relationship) {
+                        if (null == relationship) continue;
+
+                        //KGLog.i("内存中的一级节点--->" + relationship.firstLevelNodeId);
+
+                        if (relationship.firstLevelNodeId.equals(mRelationship.firstLevelNodeId)) {
+                            relationship.secondLevelNodes = secondLevelNodes;
+                            //KGLog.d("relationship.secondLevelNodes--->" + relationship.secondLevelNodes.size());
+                            break;
+                        }
+                    }
+
+                    MainActivity.saveAllDatas();
+
+
+                    break;
                 }
 
-                MainActivity.saveAllDatas();
-
-
-                break;
-            }
-
-            default: {
-                break;
+                default: {
+                    break;
+                }
             }
         }
     }

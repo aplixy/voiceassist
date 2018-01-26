@@ -93,6 +93,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+
         initViews();
         initData();
         initListener();
@@ -246,18 +248,21 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             }
         }
 
-        if (null != sdCardStr) {
-            allData = sdCardAllData = JsonUtils.getObjectFromJson(sdCardStr, AllData.class);
-        }
-
         if (null != rawStr) {
             allData = rawAllData = JsonUtils.getObjectFromJson(rawStr, AllData.class);
         }
 
+        if (null != sdCardStr) {
+            allData = sdCardAllData = JsonUtils.getObjectFromJson(sdCardStr, AllData.class);
+        }
+
         if (null != rawAllData && null != sdCardAllData) {
-            allData = rawAllData;
-            if (allData.version < sdCardAllData.version) allData = sdCardAllData;
-            else if (allData.version > sdCardAllData.version) FileUtils.copyFilesFromRawNoSpace(AssistApplication.getInstance(), R.raw.json_data, filePath);
+            if (allData.version > sdCardAllData.version) {
+                allData = rawAllData;
+                FileUtils.copyFilesFromRawNoSpace(AssistApplication.getInstance(), R.raw.json_data, filePath);
+            } else {
+                allData = sdCardAllData;
+            }
         }
 
         return allData;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#131a25</color>
-    <color name="colorPrimaryDark">#131a25</color>
+    <color name="colorPrimary">#343f41</color>
+    <color name="colorPrimaryDark">#232d2e</color>
     <color name="colorAccent">#FF4081</color>
 
 
@@ -14,7 +14,7 @@
     <color name="colorSecondLevelButton">@color/colorButtonStroke</color>
     <color name="colorSecondLevelButtonRipple">#949695</color>
 
-    <color name="colorButtonStroke">#1cadca</color>
+    <color name="colorButtonStroke">#20c6ae</color>
     <color name="colorBackground">@color/colorPrimary</color>
 
     <color name="colorButtonText">@color/colorPrimary</color>
