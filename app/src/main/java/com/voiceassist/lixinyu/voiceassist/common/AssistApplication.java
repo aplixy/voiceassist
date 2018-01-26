@@ -6,6 +6,7 @@ import android.os.Environment;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.BuglyStrategy;
 import com.tencent.bugly.beta.Beta;
+import com.voiceassist.lixinyu.voiceassist.BuildConfig;
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
 
@@ -18,7 +19,7 @@ public class AssistApplication extends Application {
     protected static AssistApplication mApplication;
 
     public static final String APP_ID = "9cf0826f88"; // TODO 替换成bugly上注册的appid
-    public static final String APP_CHANNEL = "release"; // TODO 自定义渠道
+    public static final String APP_CHANNEL = BuildConfig.bugly_app_channel; // TODO 自定义渠道
     private static final String TAG = "OnUILifecycleListener";
 
     @Override
