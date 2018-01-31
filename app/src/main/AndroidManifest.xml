@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <!--必须的权限配置-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -57,6 +58,7 @@
         <activity android:name=".settings.ui.EditRelationshipActivity" />
         <activity android:name=".settings.ui.EditSecondLevelRelationActivity" />
         <activity android:name=".settings.ui.NodeSelectionActivity" />
+        <activity android:name=".settings.ui.NodeAddEditActivity" />
 
 
     </application>

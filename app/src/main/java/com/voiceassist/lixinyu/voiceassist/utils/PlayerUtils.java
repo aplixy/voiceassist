@@ -46,27 +46,44 @@ public class PlayerUtils {
             return;
         }
 
-        boolean success = playAssests(filePath);
 
-        if (!success) {
-            if (filePath.endsWith("m4a")) filePath = replaceAffix(filePath, "mp3");
-            else if (filePath.endsWith("mp3")) filePath = replaceAffix(filePath, "m4a");
+        boolean success = false;
 
+        if (filePath.contains(Constants.SD_CARD_PATH)) {
+            success = playSdCard(filePath);
+            if (!success) {
+                if (filePath.endsWith("m4a")) filePath = replaceAffix(filePath, "mp3");
+                else if (filePath.endsWith("mp3")) filePath = replaceAffix(filePath, "m4a");
+
+                success = playSdCard(filePath);
+
+                if (!success) ToastUtils.showToast("音频文件未找到");
+            }
+        } else {
             success = playAssests(filePath);
 
             if (!success) {
-                success = playSdCard(filePath);
+                if (filePath.endsWith("m4a")) filePath = replaceAffix(filePath, "mp3");
+                else if (filePath.endsWith("mp3")) filePath = replaceAffix(filePath, "m4a");
+
+                success = playAssests(filePath);
 
                 if (!success) {
-                    if (filePath.endsWith("m4a")) filePath = replaceAffix(filePath, "mp3");
-                    else if (filePath.endsWith("mp3")) filePath = replaceAffix(filePath, "m4a");
-
                     success = playSdCard(filePath);
 
-                    if (!success) ToastUtils.showToast("音频文件未找到");
+                    if (!success) {
+                        if (filePath.endsWith("m4a")) filePath = replaceAffix(filePath, "mp3");
+                        else if (filePath.endsWith("mp3")) filePath = replaceAffix(filePath, "m4a");
+
+                        success = playSdCard(filePath);
+
+                        if (!success) ToastUtils.showToast("音频文件未找到");
+                    }
                 }
             }
         }
+
+
     }
 
     public boolean playAssests(String filePath) {
@@ -105,7 +122,7 @@ public class PlayerUtils {
         KGLog.i(TAG, "playSdCard--->filePath--->" + filePath);
 
         String sdCardFilePath = filePath;
-        if (!filePath.contains(Constants.ROOT_PATH)) {
+        if (!filePath.contains(Constants.SD_CARD_PATH)) {
             sdCardFilePath = Constants.ROOT_PATH + filePath;
             KGLog.v(TAG, "playSdCard--->sdCardFilePath--->" + sdCardFilePath);
         }

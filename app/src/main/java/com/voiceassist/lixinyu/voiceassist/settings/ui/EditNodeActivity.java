@@ -1,5 +1,6 @@
 package com.voiceassist.lixinyu.voiceassist.settings.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -23,6 +24,8 @@ import java.util.List;
  */
 
 public class EditNodeActivity extends BaseActivity implements EditNodeDialog.OnPositiveButtonClickListener {
+
+    private static final int REQ_ADD_EDIT = 0x100;
 
     private Button mBtnAddNode;
 
@@ -79,13 +82,15 @@ public class EditNodeActivity extends BaseActivity implements EditNodeDialog.OnP
         mBtnAddNode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null == mEditDialog) {
-                    mEditDialog = new EditNodeDialog(EditNodeActivity.this);
-                    mEditDialog.setOnPositiveButtonClickListener(EditNodeActivity.this);
-                }
+//                if (null == mEditDialog) {
+//                    mEditDialog = new EditNodeDialog(EditNodeActivity.this);
+//                    mEditDialog.setOnPositiveButtonClickListener(EditNodeActivity.this);
+//                }
+//
+//                mEditDialog.setData(-1, null);
+//                mEditDialog.show();
 
-                mEditDialog.setData(-1, null);
-                mEditDialog.show();
+                startActivityForResult(new Intent(EditNodeActivity.this, NodeAddEditActivity.class), REQ_ADD_EDIT);
             }
         });
     }
@@ -105,5 +110,37 @@ public class EditNodeActivity extends BaseActivity implements EditNodeDialog.OnP
         mAdapter.notifyDataSetChanged();
 
         MainActivity.saveAllDatas();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (RESULT_OK != resultCode) return;
+
+        switch (requestCode) {
+            case REQ_ADD_EDIT: {
+                int position = data.getIntExtra("position", -1);
+                Node node = (Node) data.getSerializableExtra("node");
+
+                if (position != -1) {
+                    mNodeList.set(position, node);
+                } else {
+                    mNodeList.add(0, node);
+                }
+
+                MainActivity.mNodesMap.put(node.id, node);
+
+
+
+                mAdapter.notifyDataSetChanged();
+
+                MainActivity.saveAllDatas();
+                break;
+            }
+
+            default: {
+                break;
+            }
+        }
     }
 }

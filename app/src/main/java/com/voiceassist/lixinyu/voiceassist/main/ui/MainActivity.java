@@ -60,7 +60,8 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private static final int RC_STORAGE_PERMISSION = 0x100;
     private static final String[] PERMS = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+    Manifest.permission.RECORD_AUDIO};
 
     private static final int REQ_EDIT_DATA = 0x100;
 
@@ -69,11 +70,11 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private ViewPager mLevel1ViewPager;
     private ViewPager mLevel2ViewPager;
-    private TextView mTvLevel1Name;
+    private TextView mLevel1NameTv;
 
     private LoadingDialog mLoadingDialog;
 
-    private GridAdapter.OnItemClickListener mOnFirstLevelClickListener;
+    private GridAdapter.OnItemClickListener mOnLevel1ItemClickListener;
 
     private ViewPagerPointer mLevel1PagerPointer;
     private ViewPagerPointer mLevel2PagerPointer;
@@ -107,7 +108,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private void initViews() {
         mLevel1ViewPager = findViewById(R.id.main_viewpager_first_level);
         mLevel2ViewPager = findViewById(R.id.main_viewpager_second_level);
-        mTvLevel1Name = findViewById(R.id.main_textview_first_level_name);
+        mLevel1NameTv = findViewById(R.id.main_textview_first_level_name);
 
         mLoadingDialog = new LoadingDialog(this);
 
@@ -136,12 +137,12 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     }
 
     private void initListener() {
-        mOnFirstLevelClickListener = new GridAdapter.OnItemClickListener() {
+        mOnLevel1ItemClickListener = new GridAdapter.OnItemClickListener() {
             @Override
             public void onClick(int position, GridViewVo vo) {
 
                 if (null != vo.node) {
-                    mTvLevel1Name.setText(vo.node.cnName);
+                    mLevel1NameTv.setText(vo.node.cnName);
                 }
 
                 List<SecondLevelNode> secondLevelNodes = null;
@@ -157,7 +158,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             }
         };
 
-        mTvLevel1Name.setOnClickListener(new View.OnClickListener() {
+        mLevel1NameTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mTempSettingFlag < CAN_ENTER_FLAG) {
@@ -283,7 +284,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         mLevel2PagerPointer.setViewPager(mLevel2ViewPager);
 
         // 初始化指示器
-        mTvLevel1Name.setText("请点击以上按钮");
+        mLevel1NameTv.setText("请点击以上按钮");
     }
 
     private <T extends INodeId> ArrayList<View> getPagers(List<T> noteIdList) {
@@ -338,7 +339,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         gridView.setVerticalSpacing(9);
         gridView.setNumColumns(3);
         GridAdapter adapter = new GridAdapterFirstLevel(this, data, 3);
-        adapter.setOnItemClickListener(mOnFirstLevelClickListener);
+        adapter.setOnItemClickListener(mOnLevel1ItemClickListener);
         gridView.setAdapter(adapter);
 
         return gridView;

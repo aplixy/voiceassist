@@ -28,6 +28,7 @@ public class BaseActivity extends AppCompatActivity {
         //android.R.id.home对应应用程序图标的id
         if(item.getItemId() == android.R.id.home)
         {
+            onTopLeftButtonClicked();
             finish();
             return true;
         }
@@ -42,5 +43,14 @@ public class BaseActivity extends AppCompatActivity {
 
     protected void onFinishCalled() {
 
+    }
+
+    protected void onTopLeftButtonClicked() {
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

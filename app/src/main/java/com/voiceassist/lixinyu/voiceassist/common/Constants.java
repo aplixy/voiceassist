@@ -10,7 +10,9 @@ import java.io.File;
 
 public class Constants {
 
-    public static final String ROOT_PATH = FileUtils.getInnerSDCardPath() + File.separator + "voice_assist" + File.separator;
+    public static final String SD_CARD_PATH = FileUtils.getInnerSDCardPath();
+
+    public static final String ROOT_PATH = SD_CARD_PATH + File.separator + "voice_assist" + File.separator;
 
     public static final String JSON_DATA_PATH = ROOT_PATH + "json_data.txt";
 
