@@ -73,6 +73,8 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
             mEtAudioPath.setText(mNode.audioPath + "");
             mEtIcon.setText(mNode.icon + "");
 
+            mEtAudioPath.setSelection(mEtAudioPath.getText().length());
+
             if (null != id && id.length() > 0) mEtId.setEnabled(false);
         } else {
             mEtId.setText(null);
@@ -119,7 +121,7 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
 
             case R.id.add_node_play_imageview: {
                 String audioPath = mEtAudioPath.getText().toString();
-                if (null != audioPath && audioPath.length() > 0 && audioPath.contains(Constants.SD_CARD_PATH)) {
+                if (null != audioPath && audioPath.length() > 0) {
                     PlayerUtils.getInstance(this).play(audioPath);
                 } else {
                     ToastUtils.showToast("无效路径");

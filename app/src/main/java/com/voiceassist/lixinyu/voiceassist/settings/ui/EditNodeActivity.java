@@ -70,12 +70,17 @@ public class EditNodeActivity extends BaseActivity implements EditNodeDialog.OnP
             public void onClick(NodeListAdapter adapter, int position, Node node) {
                 //ToastUtils.showToast(position + "," + node.cnName);
 
-                if (null == mEditDialog) {
-                    mEditDialog = new EditNodeDialog(EditNodeActivity.this);
-                    mEditDialog.setOnPositiveButtonClickListener(EditNodeActivity.this);
-                }
-                mEditDialog.setData(position, node);
-                mEditDialog.show();
+//                if (null == mEditDialog) {
+//                    mEditDialog = new EditNodeDialog(EditNodeActivity.this);
+//                    mEditDialog.setOnPositiveButtonClickListener(EditNodeActivity.this);
+//                }
+//                mEditDialog.setData(position, node);
+//                mEditDialog.show();
+
+                Intent intent = new Intent(EditNodeActivity.this, NodeAddEditActivity.class);
+                intent.putExtra("position", position);
+                intent.putExtra("node", node);
+                startActivityForResult(intent, REQ_ADD_EDIT);
             }
         });
 
