@@ -107,17 +107,13 @@ public class EditNodeActivity extends BaseActivity {
                                     mDeleteDialog.dismiss();
 
                                     // start delete
-
                                     mNodeList.remove(pos);
                                     mAdapter.notifyDataSetChanged();
-
-
 
                                     if (null != realNode) {
                                         deleteRelationship(realNode);
                                         deleteVoiceFile(realNode.audioPath);
                                     }
-
 
                                     MainActivity.saveAllDatas();
                                 }
@@ -222,9 +218,7 @@ public class EditNodeActivity extends BaseActivity {
                 }
 
                 MainActivity.mNodesMap.put(node.id, node);
-
                 mAdapter.notifyDataSetChanged();
-
                 MainActivity.saveAllDatas();
                 break;
             }

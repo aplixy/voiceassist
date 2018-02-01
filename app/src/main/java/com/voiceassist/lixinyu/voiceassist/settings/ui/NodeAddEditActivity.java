@@ -137,10 +137,7 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
 
 
     private boolean save() {
-
-
         if (verify()) {
-
             if (null == mNode) mNode = new Node();
 
             mNode.id = mEtId.getText().toString().trim();
