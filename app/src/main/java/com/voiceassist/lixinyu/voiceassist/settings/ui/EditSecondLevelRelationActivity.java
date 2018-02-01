@@ -11,15 +11,24 @@ import android.widget.Button;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
+import com.voiceassist.lixinyu.voiceassist.common.widget.LoadingDialog;
 import com.voiceassist.lixinyu.voiceassist.common.widget.RecyclerViewDivider;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.SecondLevelNode;
 import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
 import com.voiceassist.lixinyu.voiceassist.settings.adapter.NodeListAdapter;
+import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by lilidan on 2018/1/25.
@@ -40,6 +49,8 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
 
     private ArrayList<String> mSecondLevelIdList;
 
+    private LoadingDialog mLoadingDialog;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +65,8 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
     private void initView() {
         mBtnAdd = findViewById(R.id.add_relation_button);
         mRecyclerView = findViewById(R.id.add_relation_recyclerview);
+
+        mLoadingDialog = new LoadingDialog(this);
     }
 
     private void initData() {
@@ -81,7 +94,8 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
         mSecondLevelIdList = new ArrayList<>();
 
 
-        if (null == mRelationship.secondLevelNodes || mRelationship.secondLevelNodes.size() == 0) return;
+        if (null == mRelationship.secondLevelNodes || mRelationship.secondLevelNodes.size() == 0)
+            return;
 
 
         for (SecondLevelNode secondLevelNode : mRelationship.secondLevelNodes) {
@@ -114,6 +128,109 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
         });
     }
 
+    private void updateData(final List<Node> selectedNodeList) {
+        mLoadingDialog.show();
+
+        Observable.just(selectedNodeList)
+                .observeOn(Schedulers.newThread())
+                .map(new Function<List<Node>, List<Node>>() {
+                    @Override
+                    public List<Node> apply(List<Node> nodes) throws Exception {
+                        HashSet<String> selectedIdSet = new HashSet<>();
+                        for (Node node : selectedNodeList) {
+                            if (null == node) continue;
+
+                            selectedIdSet.add(node.id);
+                        }
+
+
+                        //KGLog.d("要找的一级节点--->" + mRelationship.firstLevelNodeId);
+
+                        Relationship realRelationship = null;
+                        for (Relationship relationship : MainActivity.mAllData.relationship) {
+                            if (null == relationship) continue;
+
+                            //KGLog.i("内存中的一级节点--->" + relationship.firstLevelNodeId);
+
+                            if (relationship.firstLevelNodeId.equals(mRelationship.firstLevelNodeId)) {
+                                realRelationship = relationship;
+                                break;
+                            }
+                        }
+
+                        List<SecondLevelNode> secondLevelNodeList = null;
+                        if (null != realRelationship) {
+                            secondLevelNodeList = realRelationship.secondLevelNodes;
+                            if (selectedNodeList.size() == 0) {
+                                realRelationship.secondLevelNodes = new ArrayList<>();
+                            } else {
+                                if (null == secondLevelNodeList) {
+                                    secondLevelNodeList = realRelationship.secondLevelNodes = new ArrayList<>();
+                                }
+
+                                //KGLog.v("1. secondLevelNodeList.size--->" + secondLevelNodeList.size());
+                                HashSet<String> originalIdSet = new HashSet<>();
+                                if (secondLevelNodeList.size() > 0) {
+                                    for (int i = 0, size = secondLevelNodeList.size(); i < size; ) {
+                                        SecondLevelNode secondLevelNode = secondLevelNodeList.get(i);
+                                        if (null == secondLevelNode) {
+                                            i++;
+                                            continue;
+                                        }
+
+                                        if (!selectedIdSet.contains(secondLevelNode.secondLevelNodeId)) {
+                                            secondLevelNodeList.remove(i);
+                                            size--;
+                                            continue;
+                                        }
+                                        originalIdSet.add(secondLevelNode.secondLevelNodeId);
+                                        i++;
+                                    }
+                                }
+
+                                for (String selectedId : selectedIdSet) {
+                                    if (!originalIdSet.contains(selectedId)) {
+                                        SecondLevelNode secondLevelNode = new SecondLevelNode();
+                                        secondLevelNode.secondLevelNodeId = selectedId;
+                                        secondLevelNodeList.add(secondLevelNode);
+                                    }
+                                }
+                            }
+                        }
+
+                        List<Node> realList = new ArrayList<>();
+                        if (null != secondLevelNodeList) {
+                            for (SecondLevelNode secondLevelNode :
+                                    secondLevelNodeList) {
+                                if (null == secondLevelNode) continue;
+                                Node node = MainActivity.mNodesMap.get(secondLevelNode.secondLevelNodeId);
+                                if (null == node) continue;
+                                realList.add(node);
+                            }
+                        }
+
+                        return realList;
+                    }
+                }).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<Node>>() {
+                    @Override
+                    public void accept(List<Node> selectedList) throws Exception {
+                        mLoadingDialog.dismiss();
+                        MainActivity.saveAllDatas();
+
+                        mNodeList.clear();
+                        mNodeList.addAll(selectedList);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        mLoadingDialog.dismiss();
+                        ToastUtils.showToast("编辑失败");
+                    }
+                });
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -122,35 +239,73 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
             switch (requestCode) {
                 case REQ_ADD_NODE: {
                     List<Node> selectedNodeList = (List<Node>) data.getSerializableExtra("selected_node_list");
-                    mNodeList.clear();
-                    mNodeList.addAll(selectedNodeList);
-                    mAdapter.notifyDataSetChanged();
+                    if (null == selectedNodeList) selectedNodeList = new ArrayList<>();
+//                    mNodeList.clear();
+//                    mNodeList.addAll(updateData(selectedNodeList));
+//                    mAdapter.notifyDataSetChanged();
 
-                    List<SecondLevelNode> secondLevelNodes = new ArrayList<>();
-                    for (Node node : selectedNodeList) {
-                        if (null == node) continue;
-
-                        SecondLevelNode secondLevelNode = new SecondLevelNode();
-                        secondLevelNode.secondLevelNodeId = node.id;
-
-                        secondLevelNodes.add(secondLevelNode);
-                    }
-
-                    //KGLog.d("要找的一级节点--->" + mRelationship.firstLevelNodeId);
-
-                    for (Relationship relationship : MainActivity.mAllData.relationship) {
-                        if (null == relationship) continue;
-
-                        //KGLog.i("内存中的一级节点--->" + relationship.firstLevelNodeId);
-
-                        if (relationship.firstLevelNodeId.equals(mRelationship.firstLevelNodeId)) {
-                            relationship.secondLevelNodes = secondLevelNodes;
-                            //KGLog.d("relationship.secondLevelNodes--->" + relationship.secondLevelNodes.size());
-                            break;
-                        }
-                    }
-
-                    MainActivity.saveAllDatas();
+                    updateData(selectedNodeList);
+//                    HashSet<String> selectedIdSet = new HashSet<>();
+//                    for (Node node : selectedNodeList) {
+//                        if (null == node) continue;
+//
+//                        selectedIdSet.add(node.id);
+//                    }
+//
+//                    //KGLog.d("要找的一级节点--->" + mRelationship.firstLevelNodeId);
+//
+//                    Relationship realRelationship = null;
+//                    for (Relationship relationship : MainActivity.mAllData.relationship) {
+//                        if (null == relationship) continue;
+//
+//                        //KGLog.i("内存中的一级节点--->" + relationship.firstLevelNodeId);
+//
+//                        if (relationship.firstLevelNodeId.equals(mRelationship.firstLevelNodeId)) {
+//                            //relationship.secondLevelNodes = secondLevelNodes;
+//                            //KGLog.d("relationship.secondLevelNodes--->" + relationship.secondLevelNodes.size());
+//
+//                            realRelationship = relationship;
+//                            break;
+//                        }
+//                    }
+//
+//                    if (null != realRelationship) {
+//                        List<SecondLevelNode> secondLevelNodeList = realRelationship.secondLevelNodes;
+//                        if (selectedNodeList.size() == 0) {
+//                            realRelationship.secondLevelNodes = new ArrayList<>();
+//                        } else {
+//                            if (null == secondLevelNodeList) {
+//                                secondLevelNodeList = realRelationship.secondLevelNodes = new ArrayList<>();
+//                            }
+//                            HashSet<String> originalIdSet = new HashSet<>();
+//                            if (secondLevelNodeList.size() > 0) {
+//                                for (int i = 0, size = secondLevelNodeList.size(); i < size; ) {
+//                                    SecondLevelNode secondLevelNode = secondLevelNodeList.get(i);
+//                                    if (null == secondLevelNode) {
+//                                        i++;
+//                                        continue;
+//                                    }
+//
+//                                    if (!selectedIdSet.contains(secondLevelNode.secondLevelNodeId)) {
+//                                        secondLevelNodeList.remove(i);
+//                                        size--;
+//                                        continue;
+//                                    }
+//                                    originalIdSet.add(secondLevelNode.secondLevelNodeId);
+//                                }
+//                            }
+//
+//                            for (String selectedId : selectedIdSet) {
+//                                if (!originalIdSet.contains(selectedId)) {
+//                                    SecondLevelNode secondLevelNode = new SecondLevelNode();
+//                                    secondLevelNode.secondLevelNodeId = selectedId;
+//                                    secondLevelNodeList.add(secondLevelNode);
+//                                }
+//                            }
+//                        }
+//                    }
+//
+//                    MainActivity.saveAllDatas();
 
 
                     break;
