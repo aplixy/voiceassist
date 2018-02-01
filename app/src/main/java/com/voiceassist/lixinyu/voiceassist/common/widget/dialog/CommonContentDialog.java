@@ -84,6 +84,18 @@ public class CommonContentDialog extends CommonDialog implements View.OnClickLis
         }
     }
 
+    public Button getYesButton() {
+        return mYesBtn;
+    }
+
+    public Button getNoButton() {
+        return mNoBtn;
+    }
+
+    public TextView getContentTextView() {
+        return mContentTv;
+    }
+
     public static class Builder extends CommonDialog.Builder {
 
         private String contentText;

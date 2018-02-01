@@ -284,7 +284,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         mLevel2PagerPointer.setViewPager(mLevel2ViewPager);
 
         // 初始化指示器
-        mLevel1NameTv.setText("请点击以上按钮");
+        mLevel1NameTv.setText("点击按钮发音");
     }
 
     private <T extends INodeId> ArrayList<View> getPagers(List<T> noteIdList) {
@@ -327,6 +327,11 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             }
             onePageData.add(new GridViewVo(node, relationship));
         }// for循环结束
+
+        int pageSize = views.size();
+        if (0 == onePageData.size() && pageSize > 0) {
+            views.remove(pageSize - 1);
+        }
 
         return views;
     }

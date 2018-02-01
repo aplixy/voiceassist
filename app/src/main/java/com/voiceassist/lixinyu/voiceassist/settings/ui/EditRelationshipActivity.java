@@ -98,6 +98,11 @@ public class EditRelationshipActivity extends BaseActivity {
 
                 startActivity(mItemClickIntent);
             }
+
+            @Override
+            public void onLongClick(NodeListAdapter adapter, int position, Node node) {
+
+            }
         });
 
         mBtnAddRelationship.setOnClickListener(new View.OnClickListener() {

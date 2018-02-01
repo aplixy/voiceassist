@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item type="id" name="grid_index_tag">gird_index</item>
+
+    <item type="id" name="node_delete_position_tag">gird_index</item>
+    <item type="id" name="node_delete_entity_tag">gird_index</item>
 </resources>

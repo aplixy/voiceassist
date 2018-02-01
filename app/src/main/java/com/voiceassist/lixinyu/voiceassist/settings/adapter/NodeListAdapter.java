@@ -18,7 +18,7 @@ import java.util.List;
  * Created by lilidan on 2018/1/22.
  */
 
-public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.MyViewHolder> implements View.OnClickListener {
+public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.MyViewHolder> implements View.OnClickListener, View.OnLongClickListener {
 
     private Context mContext;
     private List<Node> mData;
@@ -35,6 +35,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.MyView
         MyViewHolder holder = new MyViewHolder(LayoutInflater.from(mContext).inflate(R.layout.edit_node_item, parent, false));
 
         holder.root.setOnClickListener(this);
+        holder.root.setOnLongClickListener(this);
 
         return holder;
     }
@@ -60,6 +61,17 @@ public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.MyView
         }
     }
 
+    @Override
+    public boolean onLongClick(View v) {
+        int position = (int) v.getTag();
+
+        if (null != mOnItemClickListener) {
+            mOnItemClickListener.onLongClick(this, position, mData.get(position));
+        }
+
+        return false;
+    }
+
     class MyViewHolder extends ViewHolder {
 
         TextView tv;
@@ -74,6 +86,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.MyView
 
     public interface OnItemClickListener {
         void onClick(NodeListAdapter adapter, int position, Node node);
+        void onLongClick(NodeListAdapter adapter, int position, Node node);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
