@@ -20,8 +20,8 @@ import java.util.List;
 
 public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.MyViewHolder> implements View.OnClickListener, View.OnLongClickListener {
 
-    private Context mContext;
-    private List<Node> mData;
+    protected Context mContext;
+    protected List<Node> mData;
 
     private OnItemClickListener mOnItemClickListener;
 
