@@ -2,7 +2,15 @@ package com.voiceassist.lixinyu.voiceassist.settings.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.widget.recyclerview.SimpleItemTouchHelperCallback;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.utils.KGLog;
@@ -14,15 +22,100 @@ import java.util.List;
  * Created by lilidan on 2018/2/2.
  */
 
-public class RelationshipListAdapter extends NodeListAdapter implements SimpleItemTouchHelperCallback.ItemTouchHelperAdapter {
+public class RelationshipListAdapter extends RecyclerView.Adapter<RelationshipListAdapter.MyViewHolder> implements SimpleItemTouchHelperCallback.ItemTouchHelperAdapter, View.OnClickListener {
 
     private int mFromPosition = -1;
     private int mToPosition = -1;
 
     private OnItemMoveCompleteListener mOnItemMoveCompleteListener;
 
+    private ItemTouchHelper mTouchHelper;
+
+
+    private boolean mIsAllowSortOrder;
+
+
+
+    protected Context mContext;
+    protected List<Node> mData;
+
+    private OnItemClickListener mOnItemClickListener;
+
     public RelationshipListAdapter(Context context, List<Node> data) {
-        super(context, data);
+        this.mContext = context;
+        this.mData = data;
+    }
+
+    @Override
+    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final MyViewHolder holder = new MyViewHolder(LayoutInflater.from(mContext).inflate(R.layout.edit_node_item, parent, false));
+
+        holder.itemView.setOnClickListener(this);
+
+        holder.itemView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (mIsAllowSortOrder && null != mTouchHelper && event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mTouchHelper.startDrag(holder);
+                }
+
+                return false;
+            }
+        });
+
+        return holder;
+    }
+
+    @Override
+    public void onBindViewHolder(MyViewHolder holder, int position) {
+        Node node = mData.get(position);
+        if (null != node) holder.tv.setText(node.cnName);
+
+        holder.itemView.setTag(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mData.size();
+    }
+
+    @Override
+    public void onClick(View v) {
+        int position = (int) v.getTag();
+        if (null != mOnItemClickListener) {
+            mOnItemClickListener.onClick(this, position, mData.get(position));
+        }
+    }
+
+    class MyViewHolder extends RecyclerView.ViewHolder {
+
+        TextView tv;
+        LinearLayout root;
+
+        public MyViewHolder(View view) {
+            super(view);
+            tv = (TextView) view.findViewById(R.id.edit_node_item_textview);
+            root = view.findViewById(R.id.edit_node_item_root);
+        }
+    }
+
+    public interface OnItemClickListener {
+        void onClick(RelationshipListAdapter adapter, int position, Node node);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.mOnItemClickListener = listener;
+    }
+
+    //=======================================================
+
+    public void setItemTouchHelper(ItemTouchHelper touchHelper) {
+        this.mTouchHelper = touchHelper;
+    }
+
+    public void setAllowSortOrder(boolean isAllowSortOrder) {
+        this.mIsAllowSortOrder = isAllowSortOrder;
     }
 
     @Override
@@ -34,6 +127,12 @@ public class RelationshipListAdapter extends NodeListAdapter implements SimpleIt
             Collections.swap(mData, fromPosition, toPosition);
             //刷新位置交换
             notifyItemMoved(fromPosition, toPosition);
+
+            Object sourceTag = source.itemView.getTag();
+            Object targetTag = target.itemView.getTag();
+
+            source.itemView.setTag(targetTag);
+            target.itemView.setTag(sourceTag);
         }
 
         mToPosition = toPosition;
@@ -56,8 +155,8 @@ public class RelationshipListAdapter extends NodeListAdapter implements SimpleIt
         mFromPosition = source.getAdapterPosition();
 
         //当拖拽选中时放大选中的view
-        source.itemView.setScaleX(0.9f);
-        source.itemView.setScaleY(0.9f);
+        source.itemView.setScaleX(1.05f);
+        source.itemView.setScaleY(1.05f);
     }
 
     @Override

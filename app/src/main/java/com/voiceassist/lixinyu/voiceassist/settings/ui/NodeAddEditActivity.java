@@ -194,6 +194,7 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         switch (item.getItemId()) {
             case R.id.action_save: {
                 if (save()) {

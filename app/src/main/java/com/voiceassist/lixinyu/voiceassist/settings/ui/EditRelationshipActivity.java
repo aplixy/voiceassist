@@ -8,6 +8,8 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -18,7 +20,6 @@ import com.voiceassist.lixinyu.voiceassist.common.widget.recyclerview.SimpleItem
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
 import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
-import com.voiceassist.lixinyu.voiceassist.settings.adapter.NodeListAdapter;
 import com.voiceassist.lixinyu.voiceassist.settings.adapter.RelationshipListAdapter;
 
 import java.util.ArrayList;
@@ -47,6 +48,10 @@ public class EditRelationshipActivity extends BaseActivity {
 
     private List<Relationship> relationships;
 
+    private boolean mIsAllowSort;
+
+    private int mToPosition = -1;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +62,38 @@ public class EditRelationshipActivity extends BaseActivity {
         initListener();
 
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.sort_order, menu);//这里是调用menu文件夹中的main.xml，在登陆界面label右上角的三角里显示其他功能
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_sort_order: {
+                if (!mIsAllowSort) {
+                    item.setTitle("保存排序");
+                    mIsAllowSort = true;
+                } else {
+                    sortOrder(mToPosition);
+
+                    mIsAllowSort = false;
+                    item.setTitle("排序");
+                }
+
+                mAdapter.setAllowSortOrder(mIsAllowSort);
+                break;
+            }
+
+            default: {
+                break;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initView() {
@@ -96,17 +133,23 @@ public class EditRelationshipActivity extends BaseActivity {
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mAdapter);
         //用Callback构造ItemtouchHelper
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+
+        mAdapter.setItemTouchHelper(touchHelper);
+
         //调用ItemTouchHelper的attachToRecyclerView方法建立联系
         touchHelper.attachToRecyclerView(mRecyclerView);
+
+
+
 
 
         mItemClickIntent = new Intent(this, EditSecondLevelRelationActivity.class);
     }
 
     private void initListener() {
-        mAdapter.setOnItemClickListener(new NodeListAdapter.OnItemClickListener() {
+        mAdapter.setOnItemClickListener(new RelationshipListAdapter.OnItemClickListener() {
             @Override
-            public void onClick(NodeListAdapter adapter, int position, Node node) {
+            public void onClick(RelationshipListAdapter adapter, int position, Node node) {
                 Relationship selectedRelation = null;
                 if (null != relationships) {
                     for (Relationship relationship: relationships) {
@@ -122,87 +165,12 @@ public class EditRelationshipActivity extends BaseActivity {
 
                 startActivity(mItemClickIntent);
             }
-
-            @Override
-            public void onLongClick(NodeListAdapter adapter, int position, Node node) {
-
-            }
         });
 
         mAdapter.setOnItemMoveCompleteListener(new RelationshipListAdapter.OnItemMoveCompleteListener() {
             @Override
             public void onComplete(int fromPosition, int toPosition) {
-                //KGLog.w("fromPosition--->" + fromPosition);
-                //KGLog.v("toPosition--->" + toPosition);
-
-                // 最终目的是要移动relationship列表中的项
-                if (null == relationships) return;
-
-                // 先确定要移动的结点的id，以便后续在relationship列表中搜索该结点
-                Node moveNode = mNodeList.get(toPosition);
-                if (null == moveNode || null == moveNode.id) return;
-                String moveId = moveNode.id;
-
-                // 找到当前显示的列表中被移动项的前一项的id，将来在relationship列表中把要移动的项也移动到该项的后面就可以了
-                Node preNode = toPosition > 0 ? mNodeList.get(toPosition - 1) : null;
-                String preId = null != preNode ? preNode.id : null;
-
-                int fromRelationPos = -1;
-                int toRelationPos = null != preId ? -1 : 0;// 如果没有找到前一项的id，说明目标位置就在列表最开始处
-                int preRelationPos = -1;
-
-                int i = 0;
-                for (Relationship relationship : relationships) {
-                    if (null != relationship && null != relationship.firstLevelNodeId) {
-
-                        // 查找要移动的项目前所处的索引位置
-                        if (fromRelationPos == -1 && relationship.firstLevelNodeId.equals(moveId)) {
-                            fromRelationPos = i;
-                        }
-
-                        if (fromRelationPos != -1 && toRelationPos != -1) {
-                            break;// 源位置和目标位置都找到的话就要以退出循环了
-                        } else if (toRelationPos == -1 && null != preId && relationship.firstLevelNodeId.equals(preId)) {
-                            preRelationPos = i;
-                        }
-                    }
-                    i++;
-                }
-
-                if (fromRelationPos == -1) return;
-
-                if (toRelationPos == -1) {
-                    if (preRelationPos == -1) {
-                        // 一直没有找到被移动的结点在移动之后的前一项应该是谁，说明在移动之后该结点没有前一项，那就是在列表最开始处了
-                        toRelationPos = 0;
-                    } else {
-                        // 确定了移动完成之后前一项应该的位置，那么被移动的结点在移动之后就应该位于该结点的下一项，哪怕在列表尾也先加1，后续再处理
-                        toRelationPos = preRelationPos + 1;
-                    }
-                }
-
-                //KGLog.d("fromRelationPosition--->" + fromRelationPos);
-                //KGLog.i("toRelationPosition--->" + toRelationPos);
-
-                if (toRelationPos == relationships.size()) {
-                    // 如果在列表尾
-                    relationships.add(relationships.get(fromRelationPos));
-                    relationships.remove(fromRelationPos);
-                } else {
-                    // 先把原值复制到新位置
-                    relationships.add(toRelationPos, relationships.get(fromRelationPos));
-
-                    // 再删除原值
-                    if (fromRelationPos < toRelationPos) {
-                        // 从上往下移，复制完之后不影响原位置的索引，直接删除原值
-                        relationships.remove(fromRelationPos);
-                    } else {
-                        // 从下往上移，复制完之后原来的索引也会被“顶”下一个位置，所以删除原值时索引要加1
-                        relationships.remove(fromRelationPos + 1);
-                    }
-                }
-
-                MainActivity.saveAllDatas();
+                mToPosition = toPosition;
 
 
             }
@@ -218,6 +186,86 @@ public class EditRelationshipActivity extends BaseActivity {
                 startActivityForResult(intent, REQ_EDIT_ADD);
             }
         });
+    }
+
+    private void sortOrder(int toPosition) {
+        if (!mIsAllowSort) return;
+
+        if (mToPosition == -1) return;
+
+        //KGLog.w("fromPosition--->" + fromPosition);
+        //KGLog.v("toPosition--->" + toPosition);
+
+        // 最终目的是要移动relationship列表中的项
+        if (null == relationships) return;
+
+        // 先确定要移动的结点的id，以便后续在relationship列表中搜索该结点
+        Node moveNode = mNodeList.get(toPosition);
+        if (null == moveNode || null == moveNode.id) return;
+        String moveId = moveNode.id;
+
+        // 找到当前显示的列表中被移动项的前一项的id，将来在relationship列表中把要移动的项也移动到该项的后面就可以了
+        Node preNode = toPosition > 0 ? mNodeList.get(toPosition - 1) : null;
+        String preId = null != preNode ? preNode.id : null;
+
+        int fromRelationPos = -1;
+        int toRelationPos = null != preId ? -1 : 0;// 如果没有找到前一项的id，说明目标位置就在列表最开始处
+        int preRelationPos = -1;
+
+        int i = 0;
+        for (Relationship relationship : relationships) {
+            if (null != relationship && null != relationship.firstLevelNodeId) {
+
+                // 查找要移动的项目前所处的索引位置
+                if (fromRelationPos == -1 && relationship.firstLevelNodeId.equals(moveId)) {
+                    fromRelationPos = i;
+                }
+
+                if (fromRelationPos != -1 && toRelationPos != -1) {
+                    break;// 源位置和目标位置都找到的话就要以退出循环了
+                } else if (toRelationPos == -1 && null != preId && relationship.firstLevelNodeId.equals(preId)) {
+                    preRelationPos = i;
+                }
+            }
+            i++;
+        }
+
+        if (fromRelationPos == -1) return;
+
+        if (toRelationPos == -1) {
+            if (preRelationPos == -1) {
+                // 一直没有找到被移动的结点在移动之后的前一项应该是谁，说明在移动之后该结点没有前一项，那就是在列表最开始处了
+                toRelationPos = 0;
+            } else {
+                // 确定了移动完成之后前一项应该的位置，那么被移动的结点在移动之后就应该位于该结点的下一项，哪怕在列表尾也先加1，后续再处理
+                toRelationPos = preRelationPos + 1;
+            }
+        }
+
+        //KGLog.d("fromRelationPosition--->" + fromRelationPos);
+        //KGLog.i("toRelationPosition--->" + toRelationPos);
+
+        if (toRelationPos == relationships.size()) {
+            // 如果在列表尾
+            relationships.add(relationships.get(fromRelationPos));
+            relationships.remove(fromRelationPos);
+        } else {
+            // 先把原值复制到新位置
+            relationships.add(toRelationPos, relationships.get(fromRelationPos));
+
+            // 再删除原值
+            if (fromRelationPos < toRelationPos) {
+                // 从上往下移，复制完之后不影响原位置的索引，直接删除原值
+                relationships.remove(fromRelationPos);
+            } else {
+                // 从下往上移，复制完之后原来的索引也会被“顶”下一个位置，所以删除原值时索引要加1
+                relationships.remove(fromRelationPos + 1);
+            }
+        }
+
+        MainActivity.saveAllDatas();
+
+        mToPosition = -1;
     }
 
     private ArrayList<String> getSelectedRelationIds() {

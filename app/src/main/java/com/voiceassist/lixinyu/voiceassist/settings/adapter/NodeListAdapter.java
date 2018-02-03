@@ -34,8 +34,8 @@ public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.MyView
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         MyViewHolder holder = new MyViewHolder(LayoutInflater.from(mContext).inflate(R.layout.edit_node_item, parent, false));
 
-        holder.root.setOnClickListener(this);
-        holder.root.setOnLongClickListener(this);
+        holder.itemView.setOnClickListener(this);
+        holder.itemView.setOnLongClickListener(this);
 
         return holder;
     }
@@ -45,7 +45,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.MyView
         Node node = mData.get(position);
         if (null != node) holder.tv.setText(node.cnName);
 
-        holder.root.setTag(position);
+        holder.itemView.setTag(position);
     }
 
     @Override

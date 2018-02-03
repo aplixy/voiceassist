@@ -30,7 +30,7 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public boolean isLongPressDragEnabled() {
-        return true;//长按启用拖拽
+        return false;//长按启用拖拽
     }
 
     @Override
