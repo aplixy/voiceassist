@@ -16,6 +16,7 @@ import android.widget.Button;
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
 import com.voiceassist.lixinyu.voiceassist.common.widget.RecyclerViewDivider;
+import com.voiceassist.lixinyu.voiceassist.common.widget.dialog.CommonContentDialog;
 import com.voiceassist.lixinyu.voiceassist.common.widget.recyclerview.SimpleItemTouchHelperCallback;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
@@ -38,19 +39,13 @@ public class EditRelationshipActivity extends BaseActivity {
 
     private RecyclerView mRecyclerView;
     private RelationshipListAdapter mAdapter;
-
-    private Intent mItemClickIntent;
-
-    //private ArrayMap<String, Relationship> mRelationshipMap;
     private ArrayList<Node> mNodeList;
-
-    //private ArrayList<String> mRelationIds;
 
     private List<Relationship> relationships;
 
     private boolean mIsAllowSort;
-
     private int mToPosition = -1;
+    private CommonContentDialog mTipDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,7 +55,6 @@ public class EditRelationshipActivity extends BaseActivity {
         initView();
         initData();
         initListener();
-
 
     }
 
@@ -79,7 +73,8 @@ public class EditRelationshipActivity extends BaseActivity {
                     item.setTitle("保存排序");
                     mIsAllowSort = true;
                 } else {
-                    sortOrder(mToPosition);
+                    sortOrder(mIsAllowSort, mToPosition);
+                    mToPosition = -1;
 
                     mIsAllowSort = false;
                     item.setTitle("排序");
@@ -140,10 +135,6 @@ public class EditRelationshipActivity extends BaseActivity {
         touchHelper.attachToRecyclerView(mRecyclerView);
 
 
-
-
-
-        mItemClickIntent = new Intent(this, EditSecondLevelRelationActivity.class);
     }
 
     private void initListener() {
@@ -160,10 +151,12 @@ public class EditRelationshipActivity extends BaseActivity {
                     }
                 }
 
-                mItemClickIntent.putExtra("position", position);
-                mItemClickIntent.putExtra("relationship", selectedRelation);
+                Intent intent = new Intent(EditRelationshipActivity.this, EditSecondLevelRelationActivity.class);
 
-                startActivity(mItemClickIntent);
+                intent.putExtra("position", position);
+                intent.putExtra("relationship", selectedRelation);
+
+                startActivity(intent);
             }
         });
 
@@ -188,26 +181,22 @@ public class EditRelationshipActivity extends BaseActivity {
         });
     }
 
-    private void sortOrder(int toPosition) {
-        if (!mIsAllowSort) return;
-
-        if (mToPosition == -1) return;
-
-        //KGLog.w("fromPosition--->" + fromPosition);
-        //KGLog.v("toPosition--->" + toPosition);
+    private void sortOrder(boolean isAllowSort, int toPosition) {
+        if (!isAllowSort) return;
+        if (toPosition == -1) return;
 
         // 最终目的是要移动relationship列表中的项
         if (null == relationships) return;
 
-        // 先确定要移动的结点的id，以便后续在relationship列表中搜索该结点
+        // 准备移动的前提条件（prerequisites）
         Node moveNode = mNodeList.get(toPosition);
         if (null == moveNode || null == moveNode.id) return;
         String moveId = moveNode.id;
 
-        // 找到当前显示的列表中被移动项的前一项的id，将来在relationship列表中把要移动的项也移动到该项的后面就可以了
         Node preNode = toPosition > 0 ? mNodeList.get(toPosition - 1) : null;
         String preId = null != preNode ? preNode.id : null;
 
+        // 查找移动的开始及终止位置
         int fromRelationPos = -1;
         int toRelationPos = null != preId ? -1 : 0;// 如果没有找到前一项的id，说明目标位置就在列表最开始处
         int preRelationPos = -1;
@@ -216,7 +205,6 @@ public class EditRelationshipActivity extends BaseActivity {
         for (Relationship relationship : relationships) {
             if (null != relationship && null != relationship.firstLevelNodeId) {
 
-                // 查找要移动的项目前所处的索引位置
                 if (fromRelationPos == -1 && relationship.firstLevelNodeId.equals(moveId)) {
                     fromRelationPos = i;
                 }
@@ -230,6 +218,7 @@ public class EditRelationshipActivity extends BaseActivity {
             i++;
         }
 
+        // 确定最终的开始及结束位置
         if (fromRelationPos == -1) return;
 
         if (toRelationPos == -1) {
@@ -242,11 +231,9 @@ public class EditRelationshipActivity extends BaseActivity {
             }
         }
 
-        //KGLog.d("fromRelationPosition--->" + fromRelationPos);
-        //KGLog.i("toRelationPosition--->" + toRelationPos);
 
+        // 开始移动
         if (toRelationPos == relationships.size()) {
-            // 如果在列表尾
             relationships.add(relationships.get(fromRelationPos));
             relationships.remove(fromRelationPos);
         } else {
@@ -264,8 +251,6 @@ public class EditRelationshipActivity extends BaseActivity {
         }
 
         MainActivity.saveAllDatas();
-
-        mToPosition = -1;
     }
 
     private ArrayList<String> getSelectedRelationIds() {
@@ -278,6 +263,36 @@ public class EditRelationshipActivity extends BaseActivity {
             }
         }
         return ids;
+    }
+
+    @Override
+    public void finish() {
+        if (!mIsAllowSort) {
+            super.finish();
+        } else {
+            if (null == mTipDialog) {
+                mTipDialog = new CommonContentDialog.Builder(this)
+                        .contentText("排序未保存，确定退出吗？")
+                        .noBtnText("取消")
+                        .yesBtnText("确定退出")
+                        .onNoClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                mTipDialog.dismiss();
+                            }
+                        })
+                        .onYesClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                mTipDialog.dismiss();
+                                EditRelationshipActivity.super.finish();
+                            }
+                        })
+                        .build();
+            }
+
+            mTipDialog.show();
+        }
     }
 
     @Override

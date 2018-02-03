@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.voiceassist.lixinyu.voiceassist.R;
@@ -48,7 +48,7 @@ public class RelationshipListAdapter extends RecyclerView.Adapter<RelationshipLi
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final MyViewHolder holder = new MyViewHolder(LayoutInflater.from(mContext).inflate(R.layout.edit_node_item, parent, false));
+        final MyViewHolder holder = new MyViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_relationship, parent, false));
 
         holder.itemView.setOnClickListener(this);
 
@@ -73,6 +73,12 @@ public class RelationshipListAdapter extends RecyclerView.Adapter<RelationshipLi
         if (null != node) holder.tv.setText(node.cnName);
 
         holder.itemView.setTag(position);
+
+        if (mIsAllowSortOrder) {
+            holder.ivDrag.setVisibility(View.VISIBLE);
+        } else {
+            holder.ivDrag.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -90,13 +96,15 @@ public class RelationshipListAdapter extends RecyclerView.Adapter<RelationshipLi
 
     class MyViewHolder extends RecyclerView.ViewHolder {
 
+        ImageView ivIcon;
         TextView tv;
-        LinearLayout root;
+        ImageView ivDrag;
 
         public MyViewHolder(View view) {
             super(view);
-            tv = (TextView) view.findViewById(R.id.edit_node_item_textview);
-            root = view.findViewById(R.id.edit_node_item_root);
+            ivIcon = view.findViewById(R.id.item_relationship_imageview_icon);
+            tv = view.findViewById(R.id.item_relationship_textview);
+            ivDrag = view.findViewById(R.id.item_relationship_imageview_drag);
         }
     }
 
@@ -116,6 +124,7 @@ public class RelationshipListAdapter extends RecyclerView.Adapter<RelationshipLi
 
     public void setAllowSortOrder(boolean isAllowSortOrder) {
         this.mIsAllowSortOrder = isAllowSortOrder;
+        notifyDataSetChanged();
     }
 
     @Override

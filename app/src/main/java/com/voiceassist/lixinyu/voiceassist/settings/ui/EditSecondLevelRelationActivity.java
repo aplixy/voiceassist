@@ -17,7 +17,7 @@ import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.SecondLevelNode;
 import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
-import com.voiceassist.lixinyu.voiceassist.settings.adapter.NodeListAdapter;
+import com.voiceassist.lixinyu.voiceassist.settings.adapter.RelationshipLevel2Adapter;
 import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
 
     private Button mBtnAdd;
     private RecyclerView mRecyclerView;
-    private NodeListAdapter mAdapter;
+    private RelationshipLevel2Adapter mAdapter;
     private List<Node> mNodeList;
 
     private int mPosition;
@@ -84,7 +84,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
 
 
         mNodeList = new ArrayList<>();
-        mAdapter = new NodeListAdapter(this, mNodeList);
+        mAdapter = new RelationshipLevel2Adapter(this, mNodeList);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         mRecyclerView.addItemDecoration(new RecyclerViewDivider(this, LinearLayoutManager.HORIZONTAL));
@@ -127,6 +127,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
             }
         });
     }
+
 
     private void updateData(final List<Node> selectedNodeList) {
         mLoadingDialog.show();
