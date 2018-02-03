@@ -141,20 +141,22 @@ public class EditRelationshipActivity extends BaseActivity {
         mAdapter.setOnItemClickListener(new RelationshipListAdapter.OnItemClickListener() {
             @Override
             public void onClick(RelationshipListAdapter adapter, int position, Node node) {
-                Relationship selectedRelation = null;
+                int realPosition = -1;
                 if (null != relationships) {
+                    int i = 0;
                     for (Relationship relationship: relationships) {
                         if (null != relationship && null != node && node.id.equals(relationship.firstLevelNodeId)) {
-                            selectedRelation = relationship;
+                            realPosition = i;
                             break;
                         }
+
+                        i++;
                     }
                 }
 
                 Intent intent = new Intent(EditRelationshipActivity.this, EditSecondLevelRelationActivity.class);
 
-                intent.putExtra("position", position);
-                intent.putExtra("relationship", selectedRelation);
+                intent.putExtra("position", realPosition);
 
                 startActivity(intent);
             }
@@ -164,8 +166,6 @@ public class EditRelationshipActivity extends BaseActivity {
             @Override
             public void onComplete(int fromPosition, int toPosition) {
                 mToPosition = toPosition;
-
-
             }
         });
 
