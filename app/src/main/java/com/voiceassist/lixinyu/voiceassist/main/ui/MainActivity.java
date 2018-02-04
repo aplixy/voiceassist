@@ -16,6 +16,7 @@ import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.AssistApplication;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
 import com.voiceassist.lixinyu.voiceassist.common.Constants;
+import com.voiceassist.lixinyu.voiceassist.common.rx.RxHelper;
 import com.voiceassist.lixinyu.voiceassist.common.widget.LoadingDialog;
 import com.voiceassist.lixinyu.voiceassist.common.widget.ViewPagerPointer;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.AllData;
@@ -38,12 +39,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -61,12 +62,13 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private static final String[] PERMS = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-    Manifest.permission.RECORD_AUDIO};
+            Manifest.permission.RECORD_AUDIO};
 
     private static final int REQ_EDIT_DATA = 0x100;
 
     public static AllData mAllData;
     public static ArrayMap<String, Node> mNodesMap;
+
 
     private ViewPager mLevel1ViewPager;
     private ViewPager mLevel2ViewPager;
@@ -85,8 +87,6 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private int mExitFlag = IDLE_FLAG;
     private int mTempSettingFlag = IDLE_FLAG;
-
-
 
 
     @Override
@@ -169,6 +169,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                     } else {
                         if (null != mSettingDisposable) mSettingDisposable.dispose();
                         mSettingDisposable = Observable.timer(1, TimeUnit.SECONDS).subscribe(mTempSettingConsumer);
+                        mRxManager.register(mSettingDisposable);
                     }
                 }
             }
@@ -188,8 +189,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
 
     private void getDataAsync() {
-        Observable.just(Constants.JSON_DATA_PATH).subscribeOn(Schedulers.newThread())
-                .observeOn(Schedulers.io())
+        Observable.just(Constants.JSON_DATA_PATH)
                 .map(new Function<String, AllData>() {
                     @Override
                     public AllData apply(String filePath) throws Exception {
@@ -205,10 +205,11 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
                         return allData;
                     }
-                }).observeOn(AndroidSchedulers.mainThread())
+                }).compose(RxHelper.<AllData>rxSchedulerHelper())
                 .subscribe(new Observer<AllData>() {
                     @Override
                     public void onSubscribe(Disposable d) {
+                        mRxManager.register(d);
                         mLoadingDialog.show();
                     }
 
@@ -363,10 +364,24 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
 
     public static void saveAllDatas() {
-        String jsonData = JsonUtils.getJsonFromObject(MainActivity.mAllData);
-        FileUtils.saveTextToFile(jsonData, Constants.JSON_DATA_PATH);
+        Observable.create(new ObservableOnSubscribe<Boolean>() {
+            @Override
+            public void subscribe(ObservableEmitter<Boolean> emitter) throws Exception {
+                String jsonData = JsonUtils.getJsonFromObject(MainActivity.mAllData);
+                boolean success = FileUtils.saveTextToFile(jsonData, Constants.JSON_DATA_PATH);
 
-        ToastUtils.showToast("编辑生效");
+                emitter.onNext(success);
+                //emitter.onComplete();
+            }
+        }).compose(RxHelper.<Boolean>rxSchedulerHelper())
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean success) throws Exception {
+                        ToastUtils.showToast("编辑生效");
+                    }
+                });
+
+
     }
 
 
@@ -379,7 +394,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                 //System.exit(0);
             } else {
                 mExitFlag = CAN_EXIT_FLAG;
-                Observable.timer(2, TimeUnit.SECONDS).subscribe(mExitConsumer);
+                mRxManager.register(Observable.timer(2, TimeUnit.SECONDS).subscribe(mExitConsumer));
                 ToastUtils.showToast("再按一次退出应用");
             }
 
@@ -387,7 +402,6 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         }
         return super.onKeyDown(keyCode, event);
     }
-
 
 
     // ========= API 23 permissions granted =========

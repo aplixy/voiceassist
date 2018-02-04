@@ -15,6 +15,8 @@ import android.widget.Button;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
+import com.voiceassist.lixinyu.voiceassist.common.rx.RxHelper;
+import com.voiceassist.lixinyu.voiceassist.common.widget.LoadingDialog;
 import com.voiceassist.lixinyu.voiceassist.common.widget.RecyclerViewDivider;
 import com.voiceassist.lixinyu.voiceassist.common.widget.dialog.CommonContentDialog;
 import com.voiceassist.lixinyu.voiceassist.common.widget.recyclerview.SimpleItemTouchHelperCallback;
@@ -26,6 +28,10 @@ import com.voiceassist.lixinyu.voiceassist.settings.adapter.RelationshipListAdap
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by lilidan on 2018/1/25.
@@ -46,6 +52,9 @@ public class EditRelationshipActivity extends BaseActivity {
     private boolean mIsAllowSort;
     private int mToPosition = -1;
     private CommonContentDialog mTipDialog;
+
+    private LoadingDialog mLoadingDialog;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -103,18 +112,45 @@ public class EditRelationshipActivity extends BaseActivity {
         if (null == relationships) return;
 
         mNodeList = new ArrayList<>();
-        //mRelationshipMap = new ArrayMap<>();
-        //mRelationIds = new ArrayList<>();
-        for (Relationship relationship : relationships) {
-            if (null == relationship) continue;
 
-            Node node = MainActivity.mNodesMap.get(relationship.firstLevelNodeId);
-            //mRelationIds.add(relationship.firstLevelNodeId);
-            if (null != node) {
-                mNodeList.add(node);
-                //mRelationshipMap.put(node.id, relationship);
-            }
-        }
+        mLoadingDialog = new LoadingDialog(this);
+        Observable.fromIterable(relationships)
+                .compose(RxHelper.<Relationship>rxSchedulerNewThreadHelper())
+                .subscribe(new Observer<Relationship>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mLoadingDialog.show();
+                    }
+
+                    @Override
+                    public void onNext(Relationship relationship) {
+                        if (null == relationship) return;
+
+                        Node node = MainActivity.mNodesMap.get(relationship.firstLevelNodeId);
+                        if (null != node) {
+                            mNodeList.add(node);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        mLoadingDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        mLoadingDialog.dismiss();
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+
+//        for (Relationship relationship : relationships) {
+//            if (null == relationship) continue;
+//            Node node = MainActivity.mNodesMap.get(relationship.firstLevelNodeId);
+//            if (null != node) {
+//                mNodeList.add(node);
+//            }
+//        }
 
         mAdapter = new RelationshipListAdapter(this, mNodeList);
 
@@ -144,7 +180,7 @@ public class EditRelationshipActivity extends BaseActivity {
                 int realPosition = -1;
                 if (null != relationships) {
                     int i = 0;
-                    for (Relationship relationship: relationships) {
+                    for (Relationship relationship : relationships) {
                         if (null != relationship && null != node && node.id.equals(relationship.firstLevelNodeId)) {
                             realPosition = i;
                             break;
@@ -155,9 +191,7 @@ public class EditRelationshipActivity extends BaseActivity {
                 }
 
                 Intent intent = new Intent(EditRelationshipActivity.this, EditSecondLevelRelationActivity.class);
-
                 intent.putExtra("position", realPosition);
-
                 startActivity(intent);
             }
         });
@@ -320,7 +354,7 @@ public class EditRelationshipActivity extends BaseActivity {
                     HashSet<String> originalIds = new HashSet<>();
                     //List<Relationship> allDataRelations = MainActivity.mAllData.relationship;
                     int size = relationships.size();
-                    for (int i = 0; i < size;) {
+                    for (int i = 0; i < size; ) {
                         Relationship relationship = relationships.get(i);
                         if (null != relationship) {
                             if (!selectedIds.contains(relationship.firstLevelNodeId)) {

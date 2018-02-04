@@ -5,11 +5,16 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.voiceassist.lixinyu.voiceassist.common.rx.RxManager;
+
 /**
  * Created by lilidan on 2018/1/22.
  */
 
 public class BaseActivity extends AppCompatActivity {
+    protected RxManager mRxManager = new RxManager();
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -52,5 +57,12 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mRxManager.unSubscribe();
     }
 }

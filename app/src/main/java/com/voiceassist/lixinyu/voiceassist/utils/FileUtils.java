@@ -234,7 +234,7 @@ public class FileUtils {
     }
 
 
-    public static void saveTextToFile(String text, String filePath) {
+    public static boolean saveTextToFile(String text, String filePath) {
 
         File file = new File(filePath);
         if (!file.exists()) {//如果文件夹不存在，则创建新的文件夹
@@ -253,6 +253,8 @@ public class FileUtils {
             bw.write(text);
 
             bw.flush();
+
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -268,6 +270,8 @@ public class FileUtils {
                 e.printStackTrace();
             }
         }
+
+        return false;
     }
 
 
