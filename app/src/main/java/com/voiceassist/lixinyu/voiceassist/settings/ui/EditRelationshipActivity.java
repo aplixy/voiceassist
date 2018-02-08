@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
@@ -32,6 +34,8 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 
 /**
  * Created by lilidan on 2018/1/25.
@@ -53,7 +57,9 @@ public class EditRelationshipActivity extends BaseActivity {
     private int mToPosition = -1;
     private CommonContentDialog mTipDialog;
 
-    private LoadingDialog mLoadingDialog;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private LinearLayout mRootViewGroup;
 
 
     @Override
@@ -103,46 +109,90 @@ public class EditRelationshipActivity extends BaseActivity {
     private void initView() {
         mBtnAddRelationship = findViewById(R.id.edit_relationship_add_button);
         mRecyclerView = findViewById(R.id.edit_relationship_recyclerview);
+        mSwipeRefreshLayout = findViewById(R.id.edit_relationship_swiperefreshlayout);
+        mRootViewGroup = findViewById(R.id.edit_relationship_root_viewgroup);
     }
 
     private void initData() {
         setTitle("一级节点列表");
 
         relationships = MainActivity.mAllData.relationship;
-        if (null == relationships) return;
+        if (null == relationships) {
+            mRootViewGroup.setVisibility(View.VISIBLE);
+            return;
+        }
 
         mNodeList = new ArrayList<>();
 
-        mLoadingDialog = new LoadingDialog(this);
-        Observable.fromIterable(relationships)
-                .compose(RxHelper.<Relationship>rxSchedulerNewThreadHelper())
-                .subscribe(new Observer<Relationship>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        mLoadingDialog.show();
-                    }
 
-                    @Override
-                    public void onNext(Relationship relationship) {
-                        if (null == relationship) return;
 
-                        Node node = MainActivity.mNodesMap.get(relationship.firstLevelNodeId);
-                        if (null != node) {
-                            mNodeList.add(node);
+        mSwipeRefreshLayout.setEnabled(false);
+        mSwipeRefreshLayout.setRefreshing(true);
+        Observable.just(relationships)
+                .map(new Function<List<Relationship>, List<Node>>() {
+                    @Override
+                    public List<Node> apply(List<Relationship> relationships) throws Exception {
+                        if (null != relationships) {
+                            List<Node> nodeList = new ArrayList<>();
+                            for (Relationship relationship : relationships) {
+                                if (null == relationship) continue;
+                                Node node = MainActivity.mNodesMap.get(relationship.firstLevelNodeId);
+                                if (null != node) {
+                                    nodeList.add(node);
+                                }
+                            }
+                            return nodeList;
                         }
+                        return null;
                     }
-
+                })
+                .compose(RxHelper.<List<Node>>rxSchedulerNewThreadHelper())
+                .subscribe(new Consumer<List<Node>>() {
                     @Override
-                    public void onError(Throwable e) {
-                        mLoadingDialog.dismiss();
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        mLoadingDialog.dismiss();
+                    public void accept(List<Node> nodeList) throws Exception {
+                        if (null != nodeList) {
+                            mNodeList.addAll(nodeList);
+                        }
                         mAdapter.notifyDataSetChanged();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        mRootViewGroup.setVisibility(View.VISIBLE);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        mSwipeRefreshLayout.setRefreshing(false);
                     }
                 });
+
+//        Observable.fromIterable(relationships)
+//                .compose(RxHelper.<Relationship>rxSchedulerNewThreadHelper())
+//                .subscribe(new Observer<Relationship>() {
+//                    @Override
+//                    public void onSubscribe(Disposable d) {
+//                        mLoadingDialog.show();
+//                    }
+//
+//                    @Override
+//                    public void onNext(Relationship relationship) {
+//                        if (null == relationship) return;
+//
+//                        Node node = MainActivity.mNodesMap.get(relationship.firstLevelNodeId);
+//                        if (null != node) {
+//                            mNodeList.add(node);
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        mLoadingDialog.dismiss();
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//                        mLoadingDialog.dismiss();
+//                        mAdapter.notifyDataSetChanged();
+//                    }
+//                });
 
 //        for (Relationship relationship : relationships) {
 //            if (null == relationship) continue;

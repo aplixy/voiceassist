@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/add_relation_swiperefreshlayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-
-
-    <Button
-        android:id="@+id/add_relation_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ripple_first_level_button"
-        android:text="添加或删除子节点"
-        android:textColor="@android:color/white" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/add_relation_recyclerview"
+    <LinearLayout
+        android:id="@+id/add_relation_root_viewgroup"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="7dp" />
+        android:visibility="invisible"
+        android:orientation="vertical">
 
-</LinearLayout>
+
+        <Button
+            android:id="@+id/add_relation_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ripple_first_level_button"
+            android:text="添加或删除子节点"
+            android:textColor="@android:color/white" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/add_relation_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="7dp" />
+
+    </LinearLayout>
+</android.support.v4.widget.SwipeRefreshLayout>

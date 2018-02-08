@@ -3,6 +3,7 @@ package com.voiceassist.lixinyu.voiceassist.settings.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,9 +12,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
+import com.voiceassist.lixinyu.voiceassist.common.rx.RxHelper;
 import com.voiceassist.lixinyu.voiceassist.common.widget.LoadingDialog;
 import com.voiceassist.lixinyu.voiceassist.common.widget.RecyclerViewDivider;
 import com.voiceassist.lixinyu.voiceassist.common.widget.dialog.CommonContentDialog;
@@ -24,6 +27,7 @@ import com.voiceassist.lixinyu.voiceassist.entity.dto.SecondLevelNode;
 import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
 import com.voiceassist.lixinyu.voiceassist.settings.adapter.RelationshipLevel2Adapter;
 import com.voiceassist.lixinyu.voiceassist.settings.adapter.RelationshipListAdapter;
+import com.voiceassist.lixinyu.voiceassist.utils.KGLog;
 import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
 
 import java.util.ArrayList;
@@ -31,6 +35,8 @@ import java.util.HashSet;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
@@ -53,7 +59,6 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
     private Relationship mRelationship;
     private Node mFirstLevelNode;
 
-    private ArrayList<String> mSecondLevelIdList;
 
     private LoadingDialog mLoadingDialog;
 
@@ -61,6 +66,9 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
     private boolean mIsAllowSort;
     private int mToPosition = -1;
     private CommonContentDialog mTipDialog;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private LinearLayout mRootViewGroup;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,21 +89,45 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_sort_order: {
                 if (!mIsAllowSort) {
                     item.setTitle("保存排序");
                     mIsAllowSort = true;
+                    mAdapter.setAllowSortOrder(mIsAllowSort);
                 } else {
-                    sortOrder(mIsAllowSort, mToPosition);
-                    mToPosition = -1;
+                    mLoadingDialog.show();
+                    Observable.create(new ObservableOnSubscribe<Object>() {
+                        @Override
+                        public void subscribe(ObservableEmitter<Object> e) throws Exception {
+                            sortOrder(mIsAllowSort, mToPosition);
+                            mToPosition = -1;
 
-                    mIsAllowSort = false;
-                    item.setTitle("排序");
+                            e.onNext(mToPosition);
+                            e.onComplete();
+                        }
+                    })
+                    .compose(RxHelper.<Object>rxSchedulerNewThreadHelper())
+                    .subscribe(new Consumer<Object>() {
+                        @Override
+                        public void accept(Object o) throws Exception {
+                            mIsAllowSort = false;
+                            item.setTitle("排序");
+                            mLoadingDialog.dismiss();
+                            mAdapter.setAllowSortOrder(false);
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) throws Exception {
+                            mIsAllowSort = false;
+                            item.setTitle("排序");
+                            mLoadingDialog.dismiss();
+                            mAdapter.setAllowSortOrder(false);
+                        }
+                    });
                 }
 
-                mAdapter.setAllowSortOrder(mIsAllowSort);
                 break;
             }
 
@@ -109,8 +141,11 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
     private void initView() {
         mBtnAdd = findViewById(R.id.add_relation_button);
         mRecyclerView = findViewById(R.id.add_relation_recyclerview);
+        mSwipeRefreshLayout = findViewById(R.id.add_relation_swiperefreshlayout);
+        mRootViewGroup = findViewById(R.id.add_relation_root_viewgroup);
 
         mLoadingDialog = new LoadingDialog(this);
+        mSwipeRefreshLayout.setEnabled(false);
     }
 
     private void initData() {
@@ -119,13 +154,11 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
             mRelationship = MainActivity.mAllData.relationship.get(mPosition);
         }
 
-        if (null == mRelationship) {
+        if (null == mRelationship || null == (mFirstLevelNode = MainActivity.mNodesMap.get(mRelationship.firstLevelNodeId))) {
+            ToastUtils.showToast("找不到一级结点");
+            finish();
             return;
         }
-
-        mFirstLevelNode = MainActivity.mNodesMap.get(mRelationship.firstLevelNodeId);
-
-        if (null == mFirstLevelNode) return;
 
         setTitle(mFirstLevelNode.cnName + "的子节点");
 
@@ -148,21 +181,48 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
         touchHelper.attachToRecyclerView(mRecyclerView);
 
 
-        mSecondLevelIdList = new ArrayList<>();
 
-        if (null == mRelationship.secondLevelNodes || mRelationship.secondLevelNodes.size() == 0)
+        if (null == mRelationship.secondLevelNodes || mRelationship.secondLevelNodes.size() == 0) {
+            mRootViewGroup.setVisibility(View.VISIBLE);
             return;
-
-        for (SecondLevelNode secondLevelNode : mRelationship.secondLevelNodes) {
-            if (null == secondLevelNode) continue;
-
-            mSecondLevelIdList.add(secondLevelNode.secondLevelNodeId);
-
-            Node node = MainActivity.mNodesMap.get(secondLevelNode.secondLevelNodeId);
-            if (null != node) mNodeList.add(node);
         }
 
-        mAdapter.notifyDataSetChanged();
+
+        mSwipeRefreshLayout.setRefreshing(true);
+        Observable.just(mRelationship.secondLevelNodes)
+                .map(new Function<List<SecondLevelNode>, List<Node>>() {
+                    @Override
+                    public List<Node> apply(List<SecondLevelNode> secondLevelNodes) throws Exception {
+                        List<Node> nodeList = new ArrayList<>();
+                        for (SecondLevelNode secondLevelNode : secondLevelNodes) {
+                            if (null == secondLevelNode) continue;
+
+                            Node node = MainActivity.mNodesMap.get(secondLevelNode.secondLevelNodeId);
+                            if (null != node) nodeList.add(node);
+                        }
+                        return nodeList;
+                    }
+                })
+                .compose(RxHelper.<List<Node>>rxSchedulerNewThreadHelper())
+                .subscribe(new Consumer<List<Node>>() {
+                    @Override
+                    public void accept(List<Node> nodeList) throws Exception {
+                        if (null != nodeList) {
+                            mNodeList.addAll(nodeList);
+                            mAdapter.notifyDataSetChanged();
+                        }
+
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        mRootViewGroup.setVisibility(View.VISIBLE);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        mRootViewGroup.setVisibility(View.VISIBLE);
+                    }
+                });
+
     }
 
     private void initListener() {
@@ -170,9 +230,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(EditSecondLevelRelationActivity.this, NodeSelectionActivity.class);
-                if (null != mSecondLevelIdList) {
-                    intent.putStringArrayListExtra("selected_nodes_id", mSecondLevelIdList);
-                }
+                intent.putStringArrayListExtra("selected_nodes_id", getSelectedRelationIds());
 
                 if (null != mFirstLevelNode) {
                     intent.putExtra("title", "请选择" + mFirstLevelNode.cnName + "的子结点");
@@ -191,8 +249,19 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
         });
     }
 
+    private ArrayList<String> getSelectedRelationIds() {
+        ArrayList<String> ids = new ArrayList<>();
+        if (null != mRelationship.secondLevelNodes) {
+            for (SecondLevelNode secondLevelNode : mRelationship.secondLevelNodes) {
+                if (null == secondLevelNode) continue;
 
-    private void sortOrder(boolean isAllowSort, int toPosition) {
+                ids.add(secondLevelNode.secondLevelNodeId);
+            }
+        }
+        return ids;
+    }
+
+    private void sortOrder(boolean isAllowSort, final int toPosition) {
         if (!isAllowSort) return;
         if (toPosition == -1) return;
 
@@ -200,7 +269,6 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
         List<SecondLevelNode> secondLevelNodes = null;
         if (null == mRelationship) return;
         if (null == (secondLevelNodes = mRelationship.secondLevelNodes)) return;
-
 
         // 准备移动的前提条件（prerequisites）
         Node moveNode = mNodeList.get(toPosition);
@@ -266,6 +334,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
         }
 
         MainActivity.saveAllDatas();
+
     }
 
 
@@ -303,7 +372,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
                         if (null != realRelationship) {
                             secondLevelNodeList = realRelationship.secondLevelNodes;
                             if (selectedNodeList.size() == 0) {
-                                realRelationship.secondLevelNodes = new ArrayList<>();
+                                secondLevelNodeList = realRelationship.secondLevelNodes = new ArrayList<>();
                             } else {
                                 if (null == secondLevelNodeList) {
                                     secondLevelNodeList = realRelationship.secondLevelNodes = new ArrayList<>();
@@ -339,6 +408,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
                             }
                         }
 
+
                         List<Node> realList = new ArrayList<>();
                         if (null != secondLevelNodeList) {
                             for (SecondLevelNode secondLevelNode :
@@ -349,6 +419,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
                                 realList.add(node);
                             }
                         }
+
 
                         return realList;
                     }
@@ -413,72 +484,8 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
                 case REQ_ADD_NODE: {
                     List<Node> selectedNodeList = (List<Node>) data.getSerializableExtra("selected_node_list");
                     if (null == selectedNodeList) selectedNodeList = new ArrayList<>();
-//                    mNodeList.clear();
-//                    mNodeList.addAll(updateData(selectedNodeList));
-//                    mAdapter.notifyDataSetChanged();
 
                     updateData(selectedNodeList);
-//                    HashSet<String> selectedIdSet = new HashSet<>();
-//                    for (Node node : selectedNodeList) {
-//                        if (null == node) continue;
-//
-//                        selectedIdSet.add(node.id);
-//                    }
-//
-//                    //KGLog.d("要找的一级节点--->" + mRelationship.firstLevelNodeId);
-//
-//                    Relationship realRelationship = null;
-//                    for (Relationship relationship : MainActivity.mAllData.relationship) {
-//                        if (null == relationship) continue;
-//
-//                        //KGLog.i("内存中的一级节点--->" + relationship.firstLevelNodeId);
-//
-//                        if (relationship.firstLevelNodeId.equals(mRelationship.firstLevelNodeId)) {
-//                            //relationship.secondLevelNodes = secondLevelNodes;
-//                            //KGLog.d("relationship.secondLevelNodes--->" + relationship.secondLevelNodes.size());
-//
-//                            realRelationship = relationship;
-//                            break;
-//                        }
-//                    }
-//
-//                    if (null != realRelationship) {
-//                        List<SecondLevelNode> secondLevelNodeList = realRelationship.secondLevelNodes;
-//                        if (selectedNodeList.size() == 0) {
-//                            realRelationship.secondLevelNodes = new ArrayList<>();
-//                        } else {
-//                            if (null == secondLevelNodeList) {
-//                                secondLevelNodeList = realRelationship.secondLevelNodes = new ArrayList<>();
-//                            }
-//                            HashSet<String> originalIdSet = new HashSet<>();
-//                            if (secondLevelNodeList.size() > 0) {
-//                                for (int i = 0, size = secondLevelNodeList.size(); i < size; ) {
-//                                    SecondLevelNode secondLevelNode = secondLevelNodeList.get(i);
-//                                    if (null == secondLevelNode) {
-//                                        i++;
-//                                        continue;
-//                                    }
-//
-//                                    if (!selectedIdSet.contains(secondLevelNode.secondLevelNodeId)) {
-//                                        secondLevelNodeList.remove(i);
-//                                        size--;
-//                                        continue;
-//                                    }
-//                                    originalIdSet.add(secondLevelNode.secondLevelNodeId);
-//                                }
-//                            }
-//
-//                            for (String selectedId : selectedIdSet) {
-//                                if (!originalIdSet.contains(selectedId)) {
-//                                    SecondLevelNode secondLevelNode = new SecondLevelNode();
-//                                    secondLevelNode.secondLevelNodeId = selectedId;
-//                                    secondLevelNodeList.add(secondLevelNode);
-//                                }
-//                            }
-//                        }
-//                    }
-//
-//                    MainActivity.saveAllDatas();
 
 
                     break;
