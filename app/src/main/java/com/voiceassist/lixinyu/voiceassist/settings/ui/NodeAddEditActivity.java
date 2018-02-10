@@ -124,7 +124,7 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
                     return false;
                 }
 
-                mBtnRecord.setSavePath(Constants.AUDIO_RECORD_PATH + id + ".amr");
+                mBtnRecord.setSavePath(Constants.AUDIO_RECORD_PATH + id + ".m4a");
                 return true;
             }
         });
