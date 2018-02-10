@@ -23,8 +23,8 @@ public class BaseActivity extends AppCompatActivity {
         //getSupportActionBar().hide();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setElevation(0);
     }
 
     public boolean onOptionsItemSelected(MenuItem item)

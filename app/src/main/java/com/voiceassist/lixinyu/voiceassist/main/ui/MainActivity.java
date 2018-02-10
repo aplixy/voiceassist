@@ -96,6 +96,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
+
         initViews();
         initData();
         initListener();
