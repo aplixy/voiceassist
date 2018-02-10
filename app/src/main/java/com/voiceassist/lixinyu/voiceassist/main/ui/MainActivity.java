@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -30,6 +32,7 @@ import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterFirstLevel;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterSecondLevel;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.MainPagerAdapter;
 import com.voiceassist.lixinyu.voiceassist.settings.ui.EditActivity;
+import com.voiceassist.lixinyu.voiceassist.settings.ui.SettingActivity;
 import com.voiceassist.lixinyu.voiceassist.utils.FileUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.JsonUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
@@ -103,6 +106,28 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
         Beta.checkUpgrade(false, true);
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);//这里是调用menu文件夹中的main.xml，在登陆界面label右上角的三角里显示其他功能
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_setting: {
+                startActivityForResult(new Intent(MainActivity.this, SettingActivity.class), REQ_EDIT_DATA);
+                break;
+            }
+
+            default: {
+                break;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 

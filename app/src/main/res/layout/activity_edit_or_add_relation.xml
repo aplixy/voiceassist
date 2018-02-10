@@ -5,21 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/add_relation_root_viewgroup"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="invisible"
         android:orientation="vertical">
-
-
-        <Button
-            android:id="@+id/add_relation_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_first_level_button"
-            android:text="添加或删除子节点"
-            android:textColor="@android:color/white" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/add_relation_recyclerview"
@@ -27,5 +18,15 @@
             android:layout_height="match_parent"
             android:layout_marginTop="7dp" />
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/add_relation_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/add"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"/>
+
+    </RelativeLayout>
 </android.support.v4.widget.SwipeRefreshLayout>

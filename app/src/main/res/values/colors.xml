@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#31AAA5</color>
     <color name="colorPrimaryDark">#31AAA5</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#EB6923</color>
 
 
     <!--<color name="colorPrimary">#3F51B5</color>
@@ -23,7 +23,9 @@
 
     <color name="colorDialogText">#7D7D7D</color>
 
-    <color name="colorBg">#8C8C8C</color>
+    <color name="colorActivityBg">#EFEFF0</color>
+    <color name="colorSettingText">#4C4C4C</color>
+    <color name="colorWhite">#FFFFFF</color>
 
 
 </resources>

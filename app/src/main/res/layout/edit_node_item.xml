@@ -3,15 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/edit_node_item_root"
+    android:padding="15dp"
+    android:gravity="center_vertical"
     android:background="?android:attr/selectableItemBackground"
-    android:orientation="vertical">
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/node"/>
 
     <TextView
         android:id="@+id/edit_node_item_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:padding="15dp"
+        android:layout_marginLeft="10dp"
         android:text="this is a default node"
         android:textSize="20sp" />
 

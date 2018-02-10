@@ -12,7 +12,11 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.voiceassist.lixinyu.voiceassist.R;
@@ -45,7 +49,7 @@ public class EditRelationshipActivity extends BaseActivity {
 
     private static final int REQ_EDIT_ADD = 0x100;
 
-    private Button mBtnAddRelationship;
+    private ImageView mBtnAddRelationship;
 
     private RecyclerView mRecyclerView;
     private RelationshipListAdapter mAdapter;
@@ -59,8 +63,11 @@ public class EditRelationshipActivity extends BaseActivity {
 
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private LinearLayout mRootViewGroup;
+    private ViewGroup mRootViewGroup;
 
+    private Animation mAnimOut;
+    private Animation mAnimIn;
+    private boolean mAlreayOut;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -124,6 +131,8 @@ public class EditRelationshipActivity extends BaseActivity {
 
         mNodeList = new ArrayList<>();
 
+        mAnimOut = AnimationUtils.loadAnimation(this, R.anim.out_to_bottom);
+        mAnimIn = AnimationUtils.loadAnimation(this, R.anim.in_from_bottom);
 
 
         mSwipeRefreshLayout.setEnabled(false);
@@ -261,6 +270,31 @@ public class EditRelationshipActivity extends BaseActivity {
                 intent.putExtra("title", "请选择一级结点");
 
                 startActivityForResult(intent, REQ_EDIT_ADD);
+            }
+        });
+
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy <= 0) {
+                    if (mAlreayOut) {
+                        mBtnAddRelationship.startAnimation(mAnimIn);
+                        mAlreayOut = false;
+                        mBtnAddRelationship.setClickable(true);
+                    }
+                } else {
+                    if (!mAlreayOut) {
+                        mBtnAddRelationship.startAnimation(mAnimOut);
+                        mAlreayOut = true;
+                        mBtnAddRelationship.setClickable(false);
+                    }
+                }
             }
         });
     }

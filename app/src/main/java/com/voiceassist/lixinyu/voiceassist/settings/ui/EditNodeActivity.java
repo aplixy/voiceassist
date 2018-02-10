@@ -1,5 +1,7 @@
 package com.voiceassist.lixinyu.voiceassist.settings.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -7,7 +9,10 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
@@ -31,7 +36,7 @@ public class EditNodeActivity extends BaseActivity {
 
     private static final int REQ_ADD_EDIT = 0x100;
 
-    private Button mBtnAddNode;
+    private ImageView mBtnAddNode;
 
     private RecyclerView mRecyclerView;
     private NodeListAdapter mAdapter;
@@ -39,6 +44,10 @@ public class EditNodeActivity extends BaseActivity {
     private List<Node> mNodeList;
 
     private CommonContentDialog mDeleteDialog;
+
+    private Animation mAnimOut;
+    private Animation mAnimIn;
+    private boolean mAlreayOut;
 
 
     @Override
@@ -67,6 +76,9 @@ public class EditNodeActivity extends BaseActivity {
         mRecyclerView.addItemDecoration(new RecyclerViewDivider(EditNodeActivity.this, LinearLayoutManager.HORIZONTAL));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setAdapter(mAdapter);
+
+        mAnimOut = AnimationUtils.loadAnimation(this, R.anim.out_to_bottom);
+        mAnimIn = AnimationUtils.loadAnimation(this, R.anim.in_from_bottom);
     }
 
     private void initListener() {
@@ -144,6 +156,34 @@ public class EditNodeActivity extends BaseActivity {
                 startActivityForResult(new Intent(EditNodeActivity.this, NodeAddEditActivity.class), REQ_ADD_EDIT);
             }
         });
+
+
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy <= 0) {
+                    if (mAlreayOut) {
+                        mBtnAddNode.startAnimation(mAnimIn);
+                        mAlreayOut = false;
+                        mBtnAddNode.setClickable(true);
+                    }
+                } else {
+                    if (!mAlreayOut) {
+                        mBtnAddNode.startAnimation(mAnimOut);
+                        mAlreayOut = true;
+                        mBtnAddNode.setClickable(false);
+                    }
+                }
+            }
+        });
+
+
     }
 
     private void deleteRelationship(Node node) {

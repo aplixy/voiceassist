@@ -59,6 +59,7 @@
         <activity android:name=".settings.ui.EditSecondLevelRelationActivity" />
         <activity android:name=".settings.ui.NodeSelectionActivity" />
         <activity android:name=".settings.ui.NodeAddEditActivity" />
+        <activity android:name=".settings.ui.SettingActivity" />
 
 
     </application>

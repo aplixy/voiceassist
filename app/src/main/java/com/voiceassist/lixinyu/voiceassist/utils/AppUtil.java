@@ -75,15 +75,15 @@ public class AppUtil {
     public static String getCurVersionName(Context context) {
         try {
             PackageInfo pinfo;
-            pinfo = context.getPackageManager().getPackageInfo("com.kugou.fm",
+            pinfo = context.getPackageManager().getPackageInfo("com.voiceassist.lixinyu.voiceassist",
                     PackageManager.GET_CONFIGURATIONS);
             String versionCode = pinfo.versionName;
-            return "版本号  V " + versionCode;
+            return "" + versionCode;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return "版本号  V1.0";
+        return "1.0";
     }
     
     /**
@@ -94,7 +94,7 @@ public class AppUtil {
     public static String getCurVer(Context context){
     	try {
             PackageInfo pinfo;
-            pinfo = context.getPackageManager().getPackageInfo("com.kugou.fm",
+            pinfo = context.getPackageManager().getPackageInfo("com.voiceassist.lixinyu.voiceassist",
                     PackageManager.GET_CONFIGURATIONS);
             String versionCode = pinfo.versionName;
             return versionCode;

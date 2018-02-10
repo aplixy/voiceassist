@@ -11,7 +11,11 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.voiceassist.lixinyu.voiceassist.R;
@@ -50,7 +54,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
 
     private static final int REQ_ADD_NODE = 0x100;
 
-    private Button mBtnAdd;
+    private ImageView mBtnAdd;
     private RecyclerView mRecyclerView;
     private RelationshipLevel2Adapter mAdapter;
     private List<Node> mNodeList;
@@ -68,7 +72,11 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
     private CommonContentDialog mTipDialog;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private LinearLayout mRootViewGroup;
+    private ViewGroup mRootViewGroup;
+
+    private Animation mAnimOut;
+    private Animation mAnimIn;
+    private boolean mAlreayOut;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -162,6 +170,9 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
 
         setTitle(mFirstLevelNode.cnName + "的子节点");
 
+        mAnimOut = AnimationUtils.loadAnimation(this, R.anim.out_to_bottom);
+        mAnimIn = AnimationUtils.loadAnimation(this, R.anim.in_from_bottom);
+
 
         mNodeList = new ArrayList<>();
         mAdapter = new RelationshipLevel2Adapter(this, mNodeList);
@@ -245,6 +256,31 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
             @Override
             public void onComplete(int fromPosition, int toPosition) {
                 mToPosition = toPosition;
+            }
+        });
+
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy <= 0) {
+                    if (mAlreayOut) {
+                        mBtnAdd.startAnimation(mAnimIn);
+                        mAlreayOut = false;
+                        mBtnAdd.setClickable(true);
+                    }
+                } else {
+                    if (!mAlreayOut) {
+                        mBtnAdd.startAnimation(mAnimOut);
+                        mAlreayOut = true;
+                        mBtnAdd.setClickable(false);
+                    }
+                }
             }
         });
     }

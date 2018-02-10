@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorActivityBg">
+
+    <RelativeLayout
+        android:id="@+id/setting_item_account"
+        style="@style/settingItemBgStyle"
+        android:layout_marginTop="10dp">
+        <TextView
+            style="@style/settingItemTextStyle"
+            android:text="账号设置"/>
+
+        <ImageView
+            style="@style/settingItemArrowStyle"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/setting_item_node"
+        style="@style/settingItemBgStyle"
+        android:layout_marginTop="10dp">
+        <TextView
+            style="@style/settingItemTextStyle"
+            android:text="编辑节点"/>
+
+        <ImageView
+            style="@style/settingItemArrowStyle"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/setting_item_relationship"
+        style="@style/settingItemBgStyle"
+        android:layout_marginTop="1px">
+        <TextView
+            style="@style/settingItemTextStyle"
+            android:text="编辑关系"/>
+
+        <ImageView
+            style="@style/settingItemArrowStyle"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/setting_item_version"
+        style="@style/settingItemBgStyle"
+        android:layout_marginTop="10dp">
+        <TextView
+            style="@style/settingItemTextStyle"
+            android:text="版本信息"/>
+
+        <TextView
+            android:id="@+id/setting_item_version_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textSize="15sp"
+            android:textColor="#cccccc"
+            android:layout_toLeftOf="@+id/setting_item_version_arrow"
+            android:layout_marginRight="7dp"
+            android:text="1.0"/>
+
+        <ImageView
+            android:id="@+id/setting_item_version_arrow"
+            style="@style/settingItemArrowStyle"/>
+    </RelativeLayout>
+
+</LinearLayout>
