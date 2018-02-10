@@ -16,6 +16,12 @@
         android:enabled="false"
         android:duplicateParentState="true" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:src="@drawable/node"/>
+
     <TextView
         android:id="@+id/node_selection_item_textview"
         android:layout_width="match_parent"

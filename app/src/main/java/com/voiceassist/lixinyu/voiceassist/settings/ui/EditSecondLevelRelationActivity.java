@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -50,7 +51,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by lilidan on 2018/1/25.
  */
 
-public class EditSecondLevelRelationActivity extends BaseActivity {
+public class EditSecondLevelRelationActivity extends BaseActivity implements IEmptyable {
 
     private static final int REQ_ADD_NODE = 0x100;
 
@@ -72,11 +73,14 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
     private CommonContentDialog mTipDialog;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ViewGroup mRootViewGroup;
+    //private ViewGroup mRootViewGroup;
 
     private Animation mAnimOut;
     private Animation mAnimIn;
     private boolean mAlreayOut;
+
+    private ViewStub mViewStub;
+    private View mEmptyView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -150,7 +154,9 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
         mBtnAdd = findViewById(R.id.add_relation_button);
         mRecyclerView = findViewById(R.id.add_relation_recyclerview);
         mSwipeRefreshLayout = findViewById(R.id.add_relation_swiperefreshlayout);
-        mRootViewGroup = findViewById(R.id.add_relation_root_viewgroup);
+        //mRootViewGroup = findViewById(R.id.add_relation_root_viewgroup);
+        mViewStub = findViewById(R.id.add_relation_empty_view_stub);
+        //mEmptyView = findViewById(R.id.add_relation_empty_view);
 
         mLoadingDialog = new LoadingDialog(this);
         mSwipeRefreshLayout.setEnabled(false);
@@ -194,7 +200,8 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
 
 
         if (null == mRelationship.secondLevelNodes || mRelationship.secondLevelNodes.size() == 0) {
-            mRootViewGroup.setVisibility(View.VISIBLE);
+            //mRootViewGroup.setVisibility(View.VISIBLE);
+            justifyDisplayEmptyView();
             return;
         }
 
@@ -221,16 +228,18 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
                         if (null != nodeList) {
                             mNodeList.addAll(nodeList);
                             mAdapter.notifyDataSetChanged();
+                            justifyDisplayEmptyView();
                         }
 
                         mSwipeRefreshLayout.setRefreshing(false);
-                        mRootViewGroup.setVisibility(View.VISIBLE);
+                        //mRootViewGroup.setVisibility(View.VISIBLE);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
                         mSwipeRefreshLayout.setRefreshing(false);
-                        mRootViewGroup.setVisibility(View.VISIBLE);
+                        //mRootViewGroup.setVisibility(View.VISIBLE);
+                        justifyDisplayEmptyView();
                     }
                 });
 
@@ -469,6 +478,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
                         mNodeList.clear();
                         mNodeList.addAll(selectedList);
                         mAdapter.notifyDataSetChanged();
+                        justifyDisplayEmptyView();
                     }
                 }, new Consumer<Throwable>() {
                     @Override
@@ -531,6 +541,15 @@ public class EditSecondLevelRelationActivity extends BaseActivity {
                     break;
                 }
             }
+        }
+    }
+
+    @Override
+    public void justifyDisplayEmptyView() {
+        if (null == mNodeList || mNodeList.size() == 0) {
+            mViewStub.setVisibility(View.VISIBLE);
+        } else {
+            mViewStub.setVisibility(View.GONE);
         }
     }
 }

@@ -9,6 +9,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -32,7 +33,7 @@ import java.util.List;
  * Created by lilidan on 2018/1/25.
  */
 
-public class EditNodeActivity extends BaseActivity {
+public class EditNodeActivity extends BaseActivity implements IEmptyable {
 
     private static final int REQ_ADD_EDIT = 0x100;
 
@@ -49,6 +50,8 @@ public class EditNodeActivity extends BaseActivity {
     private Animation mAnimIn;
     private boolean mAlreayOut;
 
+    private ViewStub mEmptyViewStub;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,6 +66,7 @@ public class EditNodeActivity extends BaseActivity {
     private void initView() {
         mBtnAddNode = findViewById(R.id.edit_node_add_button);
         mRecyclerView = findViewById(R.id.edit_node_recyclerview);
+        mEmptyViewStub = findViewById(R.id.edit_node_empty_view_stub);
     }
 
     private void initData() {
@@ -76,6 +80,8 @@ public class EditNodeActivity extends BaseActivity {
         mRecyclerView.addItemDecoration(new RecyclerViewDivider(EditNodeActivity.this, LinearLayoutManager.HORIZONTAL));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setAdapter(mAdapter);
+
+        justifyDisplayEmptyView();
 
         mAnimOut = AnimationUtils.loadAnimation(this, R.anim.out_to_bottom);
         mAnimIn = AnimationUtils.loadAnimation(this, R.anim.in_from_bottom);
@@ -121,6 +127,7 @@ public class EditNodeActivity extends BaseActivity {
                                     // start delete
                                     mNodeList.remove(pos);
                                     mAdapter.notifyDataSetChanged();
+                                    justifyDisplayEmptyView();
 
                                     if (null != realNode) {
                                         deleteRelationship(realNode);
@@ -259,6 +266,7 @@ public class EditNodeActivity extends BaseActivity {
 
                 MainActivity.mNodesMap.put(node.id, node);
                 mAdapter.notifyDataSetChanged();
+                justifyDisplayEmptyView();
                 MainActivity.saveAllDatas();
                 break;
             }
@@ -266,6 +274,15 @@ public class EditNodeActivity extends BaseActivity {
             default: {
                 break;
             }
+        }
+    }
+
+    @Override
+    public void justifyDisplayEmptyView() {
+        if (null == mNodeList || mNodeList.size() == 0) {
+            mEmptyViewStub.setVisibility(View.VISIBLE);
+        } else {
+            mEmptyViewStub.setVisibility(View.GONE);
         }
     }
 }

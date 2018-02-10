@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -45,7 +46,7 @@ import io.reactivex.functions.Function;
  * Created by lilidan on 2018/1/25.
  */
 
-public class EditRelationshipActivity extends BaseActivity {
+public class EditRelationshipActivity extends BaseActivity implements IEmptyable {
 
     private static final int REQ_EDIT_ADD = 0x100;
 
@@ -63,11 +64,13 @@ public class EditRelationshipActivity extends BaseActivity {
 
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ViewGroup mRootViewGroup;
+    //private ViewGroup mRootViewGroup;
 
     private Animation mAnimOut;
     private Animation mAnimIn;
     private boolean mAlreayOut;
+
+    private ViewStub mEmptyViewStub;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -117,7 +120,7 @@ public class EditRelationshipActivity extends BaseActivity {
         mBtnAddRelationship = findViewById(R.id.edit_relationship_add_button);
         mRecyclerView = findViewById(R.id.edit_relationship_recyclerview);
         mSwipeRefreshLayout = findViewById(R.id.edit_relationship_swiperefreshlayout);
-        mRootViewGroup = findViewById(R.id.edit_relationship_root_viewgroup);
+        mEmptyViewStub = findViewById(R.id.edit_relationship_empty_view_stub);
     }
 
     private void initData() {
@@ -125,8 +128,7 @@ public class EditRelationshipActivity extends BaseActivity {
 
         relationships = MainActivity.mAllData.relationship;
         if (null == relationships) {
-            mRootViewGroup.setVisibility(View.VISIBLE);
-            return;
+            relationships = MainActivity.mAllData.relationship = new ArrayList<>();
         }
 
         mNodeList = new ArrayList<>();
@@ -163,13 +165,15 @@ public class EditRelationshipActivity extends BaseActivity {
                             mNodeList.addAll(nodeList);
                         }
                         mAdapter.notifyDataSetChanged();
+                        justifyDisplayEmptyView();
+
                         mSwipeRefreshLayout.setRefreshing(false);
-                        mRootViewGroup.setVisibility(View.VISIBLE);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
                         mSwipeRefreshLayout.setRefreshing(false);
+                        justifyDisplayEmptyView();
                     }
                 });
 
@@ -468,6 +472,7 @@ public class EditRelationshipActivity extends BaseActivity {
                     }
 
                     mAdapter.notifyDataSetChanged();
+                    justifyDisplayEmptyView();
 
                     MainActivity.saveAllDatas();
 
@@ -478,6 +483,15 @@ public class EditRelationshipActivity extends BaseActivity {
                     break;
                 }
             }
+        }
+    }
+
+    @Override
+    public void justifyDisplayEmptyView() {
+        if (null == mNodeList || mNodeList.size() == 0) {
+            mEmptyViewStub.setVisibility(View.VISIBLE);
+        } else {
+            mEmptyViewStub.setVisibility(View.GONE);
         }
     }
 }

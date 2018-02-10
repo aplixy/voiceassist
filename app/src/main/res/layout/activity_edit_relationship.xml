@@ -8,7 +8,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/edit_relationship_root_viewgroup"
-        android:visibility="invisible"
         android:orientation="vertical">
 
         <android.support.v7.widget.RecyclerView
@@ -16,6 +15,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="7dp" />
+
+        <ViewStub
+            android:id="@+id/edit_relationship_empty_view_stub"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout="@layout/empty_view"
+            android:background="@android:color/white"/>
 
         <ImageView
             android:id="@+id/edit_relationship_add_button"

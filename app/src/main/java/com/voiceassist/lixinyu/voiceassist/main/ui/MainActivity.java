@@ -10,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewStub;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -32,6 +33,7 @@ import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterFirstLevel;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.GridAdapterSecondLevel;
 import com.voiceassist.lixinyu.voiceassist.main.adapter.MainPagerAdapter;
 import com.voiceassist.lixinyu.voiceassist.settings.ui.EditActivity;
+import com.voiceassist.lixinyu.voiceassist.settings.ui.IEmptyable;
 import com.voiceassist.lixinyu.voiceassist.settings.ui.SettingActivity;
 import com.voiceassist.lixinyu.voiceassist.utils.FileUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.JsonUtils;
@@ -51,7 +53,7 @@ import io.reactivex.functions.Function;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends BaseActivity implements EasyPermissions.PermissionCallbacks {
+public class MainActivity extends BaseActivity implements EasyPermissions.PermissionCallbacks, IEmptyable {
 
     private static final String TAG = "MainActivity";
 
@@ -89,6 +91,13 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private int mExitFlag = IDLE_FLAG;
     private int mTempSettingFlag = IDLE_FLAG;
+
+
+    private ViewStub mTopEmptyViewStub;
+    private ViewStub mBottomEmptyViewStub;
+
+    private List<Relationship> relationshipList;
+    private List<SecondLevelNode> secondLevelNodes;
 
 
     @Override
@@ -135,6 +144,9 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         mLevel2ViewPager = findViewById(R.id.main_viewpager_second_level);
         mLevel1NameTv = findViewById(R.id.main_textview_first_level_name);
 
+        mTopEmptyViewStub = findViewById(R.id.main_top_empty_viewstub);
+        mBottomEmptyViewStub = findViewById(R.id.main_bottom_empty_viewstub);
+
         mLoadingDialog = new LoadingDialog(this);
 
         mLevel1PagerPointer = findViewById(R.id.main_pager_indicator_first_level);
@@ -170,16 +182,23 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
                     mLevel1NameTv.setText(vo.node.cnName);
                 }
 
-                List<SecondLevelNode> secondLevelNodes = null;
-                if (null != vo && null != vo.relationship && null != vo.relationship.secondLevelNodes && vo.relationship.secondLevelNodes.size() > 0) {
-                    mLevel2PagerPointer.setVisibility(View.VISIBLE);
+                secondLevelNodes = null;
+                if (null != vo && null != vo.relationship) {
                     secondLevelNodes = vo.relationship.secondLevelNodes;
-                } else {
-                    mLevel2PagerPointer.setVisibility(View.INVISIBLE);
                 }
 
-                mLevel2ViewPager.setAdapter(new MainPagerAdapter(getPagers(secondLevelNodes)));
+                ArrayList<View> pagerViews = getPagers(secondLevelNodes);
+
+                mLevel2ViewPager.setAdapter(new MainPagerAdapter(pagerViews));
                 mLevel2PagerPointer.setViewPager(mLevel2ViewPager);
+
+                if (null == pagerViews || pagerViews.size() <= 1) {
+                    mLevel2PagerPointer.setVisibility(View.INVISIBLE);
+                } else {
+                    mLevel2PagerPointer.setVisibility(View.VISIBLE);
+                }
+
+                justifyDisplayEmptyView();
             }
         };
 
@@ -298,19 +317,31 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
     private void renderView(AllData allData) {
         mAllData = allData;
 
-        List<Relationship> relationshipList = null;
+        relationshipList = null;
         if (null != allData) relationshipList = allData.relationship;
 
         // 渲染一级菜单
-        mLevel1ViewPager.setAdapter(new MainPagerAdapter(getPagers(relationshipList)));
+        ArrayList<View> level1PagerViews = getPagers(relationshipList);
+        mLevel1ViewPager.setAdapter(new MainPagerAdapter(level1PagerViews));
         mLevel1PagerPointer.setViewPager(mLevel1ViewPager);
 
         // 渲染二级菜单
+        secondLevelNodes = null;
         mLevel2ViewPager.setAdapter(new MainPagerAdapter(null));
         mLevel2PagerPointer.setViewPager(mLevel2ViewPager);
 
         // 初始化指示器
-        mLevel1NameTv.setText("点击按钮发音");
+        mLevel1NameTv.setText("点击上边按钮发音");
+
+        if (null == level1PagerViews || level1PagerViews.size() <= 1) {
+            mLevel1PagerPointer.setVisibility(View.INVISIBLE);
+        } else {
+            mLevel1PagerPointer.setVisibility(View.VISIBLE);
+        }
+
+        mLevel2PagerPointer.setVisibility(View.INVISIBLE);
+
+        justifyDisplayEmptyView();
     }
 
     private <T extends INodeId> ArrayList<View> getPagers(List<T> noteIdList) {
@@ -489,6 +520,21 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             default: {
                 break;
             }
+        }
+    }
+
+    @Override
+    public void justifyDisplayEmptyView() {
+        if (null == relationshipList || relationshipList.size() == 0) {
+            mTopEmptyViewStub.setVisibility(View.VISIBLE);
+        } else {
+            mTopEmptyViewStub.setVisibility(View.GONE);
+        }
+
+        if (null == secondLevelNodes || secondLevelNodes.size() == 0) {
+            mBottomEmptyViewStub.setVisibility(View.VISIBLE);
+        } else {
+            mBottomEmptyViewStub.setVisibility(View.GONE);
         }
     }
 }

@@ -9,7 +9,9 @@ import android.widget.TextView;
 
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
+import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
 import com.voiceassist.lixinyu.voiceassist.utils.AppUtil;
+import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
 
 /**
  * Created by lilidan on 2018/1/25.
@@ -57,7 +59,12 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 break;
             }
             case R.id.setting_item_relationship: {
-                startActivity(new Intent(this, EditRelationshipActivity.class));
+                if (null == MainActivity.mAllData.nodes || MainActivity.mAllData.nodes.size() == 0) {
+                    ToastUtils.showToast("请先配置结点");
+                } else {
+                    startActivity(new Intent(this, EditRelationshipActivity.class));
+                }
+
                 break;
             }
             default:{

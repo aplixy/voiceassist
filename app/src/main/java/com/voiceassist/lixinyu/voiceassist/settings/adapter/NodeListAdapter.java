@@ -32,7 +32,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.MyView
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        MyViewHolder holder = new MyViewHolder(LayoutInflater.from(mContext).inflate(R.layout.edit_node_item, parent, false));
+        MyViewHolder holder = new MyViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_edit_node, parent, false));
 
         holder.itemView.setOnClickListener(this);
         holder.itemView.setOnLongClickListener(this);

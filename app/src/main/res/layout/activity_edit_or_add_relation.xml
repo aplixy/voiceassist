@@ -9,14 +9,29 @@
         android:id="@+id/add_relation_root_viewgroup"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
-        android:orientation="vertical">
+        android:visibility="visible">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/add_relation_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="7dp" />
+
+        <ViewStub
+            android:id="@+id/add_relation_empty_view_stub"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout="@layout/empty_view"
+            android:background="@android:color/white"/>
+
+        <!--<FrameLayout-->
+            <!--android:id="@+id/add_relation_empty_view"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:visibility="gone"-->
+            <!--android:background="@android:color/white">-->
+            <!--<include layout="@layout/empty_view"/>-->
+        <!--</FrameLayout>-->
 
         <ImageView
             android:id="@+id/add_relation_button"
