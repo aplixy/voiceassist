@@ -5,5 +5,5 @@
     android:repeatCount="-1"
     android:repeatMode="reverse"
     android:valueFrom="0.5"
-    android:valueTo="1"
+    android:valueTo="1.5"
     android:valueType="floatType" />
