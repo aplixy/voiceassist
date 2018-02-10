@@ -26,6 +26,7 @@
     <color name="colorActivityBg">#EFEFF0</color>
     <color name="colorSettingText">#4C4C4C</color>
     <color name="colorWhite">#FFFFFF</color>
+    <color name="colorTransparent">#00000000</color>
 
 
 </resources>

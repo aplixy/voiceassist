@@ -1,7 +1,11 @@
 package com.voiceassist.lixinyu.voiceassist.settings.ui;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,6 +13,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.tbruyelle.rxpermissions2.Permission;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.voiceassist.lixinyu.voiceassist.R;
 import com.voiceassist.lixinyu.voiceassist.common.BaseActivity;
 import com.voiceassist.lixinyu.voiceassist.common.Constants;
@@ -17,6 +23,9 @@ import com.voiceassist.lixinyu.voiceassist.common.widget.dialog.CommonContentDia
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.utils.PlayerUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
+
+import io.reactivex.functions.Consumer;
+import pub.devrel.easypermissions.AppSettingsDialog;
 
 /**
  * Created by lilidan on 2018/1/30.
@@ -37,6 +46,8 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
     private Node mNode;
 
     private CommonContentDialog mTipDialog;
+
+    private RxPermissions mRxPermissions;
 
 
     @Override
@@ -83,6 +94,16 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
             mEtIcon.setText(null);
             mEtId.setEnabled(true);
         }
+
+        requestPermissions();
+
+    }
+
+    private ResolveInfo getResolveInfo() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        ResolveInfo ri = this.getPackageManager().
+                resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        return ri;
     }
 
     private void initListener() {
@@ -90,13 +111,20 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
         mBtnRecord.setOnBeforeRecordListener(new RecordButton.OnBeforeRecordListener() {
             @Override
             public boolean isAllowStartRecord() {
+
+                if (null == mRxPermissions) mRxPermissions = new RxPermissions(NodeAddEditActivity.this);
+                if (!mRxPermissions.isGranted(Manifest.permission.RECORD_AUDIO)) {
+                    requestPermissions();
+                    return false;
+                }
+
                 String id = mEtId.getText().toString();
                 if (null == id || id.trim().length() == 0) {
                     ToastUtils.showToast("id不能为空");
                     return false;
                 }
 
-                mBtnRecord.setSavePath(Constants.AUDIO_RECORD_PATH + id + ".m4a");
+                mBtnRecord.setSavePath(Constants.AUDIO_RECORD_PATH + id + ".amr");
                 return true;
             }
         });
@@ -113,6 +141,27 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
         });
 
         mIvPlay.setOnClickListener(this);
+    }
+
+    private void requestPermissions() {
+        if (null == mRxPermissions) mRxPermissions = new RxPermissions(NodeAddEditActivity.this);
+
+
+        mRxPermissions.requestEach(Manifest.permission.RECORD_AUDIO)
+                .subscribe(new Consumer<Permission>() {
+                    @Override
+                    public void accept(Permission permission) throws Exception {
+                        if (permission.granted) {
+                            // 用户已经同意该权限
+
+                        } else if (permission.shouldShowRequestPermissionRationale) {
+                            // 用户拒绝了该权限，没有选中『不再询问』（Never ask again）,那么下次再次启动时，还会提示请求权限的对话框
+                        } else {
+                            // 用户拒绝了该权限，并且选中『不再询问』
+                            new AppSettingsDialog.Builder(NodeAddEditActivity.this).build().show();// 用户选择『不开提示』时引导用户手动开启权限
+                        }
+                    }
+                });
     }
 
     @Override

@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.voiceassist.lixinyu.voiceassist.R;
+import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -234,11 +235,11 @@ public class RecordButton extends android.support.v7.widget.AppCompatButton {
 
         if (null == mRecorder) {
             mRecorder = new MediaRecorder();
-            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         } else {
             mRecorder.release();
         }
 
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 
         if (TextUtils.isEmpty(mFilePath)) setDefaultFilePath();
         if (!TextUtils.isEmpty(mFilePath) && mFilePath.endsWith(".m4a")) {
@@ -275,7 +276,15 @@ public class RecordButton extends android.support.v7.widget.AppCompatButton {
         }
 
         mStartTime = System.currentTimeMillis();
-        mRecorder.start();
+        try {
+            mRecorder.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            cancelRecord();
+            mIsAllowRecord = false;
+            Toast.makeText(getContext(), "设备异常", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         mThread = new ObtainDecibelThread();
         mThread.start();

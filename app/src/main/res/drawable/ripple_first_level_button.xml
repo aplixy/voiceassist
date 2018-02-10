@@ -13,7 +13,7 @@
                 android:color="@color/colorButtonStroke"
                 android:dashWidth="3.0dip"
                 android:dashGap="0.0dip" />
-            <solid android:color="@android:color/transparent"/>
+            <solid android:color="@color/colorActivityBg"/>
         </shape>
     </item>
 </ripple>
