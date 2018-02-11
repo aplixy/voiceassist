@@ -71,9 +71,9 @@
         android:layout_width="35dp"
         android:layout_height="40dp"
         android:src="@drawable/play"
-        android:paddingBottom="7dp"
-        android:layout_alignBottom="@+id/add_node_audioPath_edittext"
-        android:layout_alignRight="@+id/add_node_id_edittext"/>
+        android:paddingBottom="0dp"
+        android:layout_alignBottom="@+id/add_node_audiopath_title_textview"
+        android:layout_alignRight="@+id/add_node_cnname_edittext"/>
 
     <TextView
         android:id="@+id/add_node_icon_title_textview"

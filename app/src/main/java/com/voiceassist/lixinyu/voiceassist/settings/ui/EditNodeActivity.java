@@ -25,6 +25,7 @@ import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship;
 import com.voiceassist.lixinyu.voiceassist.entity.dto.SecondLevelNode;
 import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity;
 import com.voiceassist.lixinyu.voiceassist.settings.adapter.NodeListAdapter;
+import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
 
 import java.io.File;
 import java.util.List;
@@ -85,6 +86,8 @@ public class EditNodeActivity extends BaseActivity implements IEmptyable {
 
         mAnimOut = AnimationUtils.loadAnimation(this, R.anim.out_to_bottom);
         mAnimIn = AnimationUtils.loadAnimation(this, R.anim.in_from_bottom);
+
+        ToastUtils.showToast("长按可删除");
     }
 
     private void initListener() {
@@ -145,7 +148,7 @@ public class EditNodeActivity extends BaseActivity implements IEmptyable {
                             })
                             .build();
                 } else {
-                    mDeleteDialog.getContentTextView().setText("确认删除" + node.cnName + "节点吗？");
+                    mDeleteDialog.getContentTextView().setText("确认删除“" + node.cnName + "”节点吗？");
                 }
 
                 Button yesButton = mDeleteDialog.getYesButton();

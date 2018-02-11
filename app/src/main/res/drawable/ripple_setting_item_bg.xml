@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:color="@color/colorLevelButtonText"
-    tools:targetApi="lollipop">
-    <item>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--第一种方法-->
+    <!--<item android:drawable="@drawable/shape_border_press" android:state_pressed="true" />-->
+    <!--<item android:drawable="@drawable/shape_border_nor" android:state_window_focused="false"/>-->
+
+    <!--第二种方法-->
+    <!--默认情况下是一个带圆角,白色背景,蓝色边框的矩形-->
+    <item android:state_window_focused="false">
         <shape android:shape="rectangle">
-            <corners android:radius="0dp"/>
-            <solid android:color="@color/colorWhite"/>
+            <corners android:radius="0dp" />
+            <solid android:color="@color/colorWhite" />
         </shape>
     </item>
-</ripple>
+    <!--单击时是一个带圆角,白色背景,绿色边框的矩形-->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="0dp" />
+            <solid android:color="@color/colorLevelButtonText" />
+        </shape>
+    </item>
+</selector>

@@ -2,28 +2,52 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="15dp"
+    android:paddingLeft="15dp"
     android:background="?android:attr/selectableItemBackground">
 
-    <ImageView
-        android:id="@+id/item_relationship_imageview_icon"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:src="@drawable/level1"/>
+
 
     <TextView
         android:id="@+id/item_relationship_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="0dp"
         android:layout_marginRight="10dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:text="this is a default node"
+        android:singleLine="true"
+        android:ellipsize="end"
         android:layout_toLeftOf="@+id/item_relationship_imageview_drag"
-        android:layout_toRightOf="@+id/item_relationship_imageview_icon"
+        android:layout_alignParentLeft="true"
         android:textSize="20sp" />
+
+
+
+    <LinearLayout
+        android:id="@+id/item_relationship_viewgroup_level"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center_vertical">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:src="@drawable/level"/>
+
+        <ImageView
+            android:id="@+id/item_relationship_imageview_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="0dp"
+            android:src="@drawable/level1"/>
+    </LinearLayout>
+
 
     <ImageView
         android:id="@+id/item_relationship_imageview_drag"
@@ -31,6 +55,7 @@
         android:layout_height="30dp"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
+        android:layout_marginRight="15dp"
         android:visibility="invisible"
         android:src="@drawable/drag"/>
 

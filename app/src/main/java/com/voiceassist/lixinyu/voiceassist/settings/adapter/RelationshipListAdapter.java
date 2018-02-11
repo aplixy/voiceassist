@@ -76,8 +76,10 @@ public class RelationshipListAdapter extends RecyclerView.Adapter<RelationshipLi
 
         if (mIsAllowSortOrder) {
             holder.ivDrag.setVisibility(View.VISIBLE);
+            holder.vgLevel.setVisibility(View.INVISIBLE);
         } else {
             holder.ivDrag.setVisibility(View.INVISIBLE);
+            holder.vgLevel.setVisibility(View.VISIBLE);
         }
     }
 
@@ -100,11 +102,14 @@ public class RelationshipListAdapter extends RecyclerView.Adapter<RelationshipLi
         TextView tv;
         ImageView ivDrag;
 
+        ViewGroup vgLevel;
+
         public MyViewHolder(View view) {
             super(view);
             ivIcon = view.findViewById(R.id.item_relationship_imageview_icon);
             tv = view.findViewById(R.id.item_relationship_textview);
             ivDrag = view.findViewById(R.id.item_relationship_imageview_drag);
+            vgLevel = view.findViewById(R.id.item_relationship_viewgroup_level);
         }
     }
 

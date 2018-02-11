@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 
 import com.voiceassist.lixinyu.voiceassist.R;
@@ -57,7 +58,7 @@ public abstract class GridAdapter extends BaseAdapter implements View.OnClickLis
         //convertView = LayoutInflater.from(mContext).inflate(R.layout.main_item_first_level, null);
         convertView = LayoutInflater.from(mContext).inflate(getLayoutId(), null);
 
-        convertView.setLayoutParams(new ViewGroup.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, parent.getHeight() / 3 - 18));
+        convertView.setLayoutParams(new AbsListView.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, parent.getHeight() / 3 - 18));
 
         convertView.setTag(R.id.grid_index_tag, position);
         convertView.setOnClickListener(this);

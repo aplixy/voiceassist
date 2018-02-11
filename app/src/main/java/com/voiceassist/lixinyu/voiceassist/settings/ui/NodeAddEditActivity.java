@@ -24,6 +24,8 @@ import com.voiceassist.lixinyu.voiceassist.entity.dto.Node;
 import com.voiceassist.lixinyu.voiceassist.utils.PlayerUtils;
 import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils;
 
+import java.io.File;
+
 import io.reactivex.functions.Consumer;
 import pub.devrel.easypermissions.AppSettingsDialog;
 
@@ -32,6 +34,8 @@ import pub.devrel.easypermissions.AppSettingsDialog;
  */
 
 public class NodeAddEditActivity extends BaseActivity implements View.OnClickListener {
+
+    private static final String RECORD_AUDIO_FORMAT = "m4a";
 
     private EditText mEtId;
     private EditText mEtCnName;
@@ -124,7 +128,7 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
                     return false;
                 }
 
-                mBtnRecord.setSavePath(Constants.AUDIO_RECORD_PATH + id + ".m4a");
+                mBtnRecord.setSavePath(getFilePath(id));
                 return true;
             }
         });
@@ -141,6 +145,10 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
         });
 
         mIvPlay.setOnClickListener(this);
+    }
+
+    private String getFilePath(String id) {
+        return Constants.AUDIO_RECORD_PATH + id + "." + RECORD_AUDIO_FORMAT;
     }
 
     private void requestPermissions() {
@@ -276,7 +284,15 @@ public class NodeAddEditActivity extends BaseActivity implements View.OnClickLis
                     .onNoClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            String id = mEtId.getText().toString().trim();
+                            if (null != id && id.length() > 0) {
+                                File file = new File(getFilePath(id));
+                                if (file.exists()) {
+                                    file.delete();
+                                }
+                            }
                             mTipDialog.dismiss();
+
                             NodeAddEditActivity.super.finish();
                         }
                     })
