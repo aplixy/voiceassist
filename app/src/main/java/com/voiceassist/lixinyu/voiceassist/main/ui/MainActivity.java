@@ -277,7 +277,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
 
     private AllData getDataSync(String filePath) {
         String sdCardStr = null;
-        String rawStr = FileUtils.readRawNoSpace(AssistApplication.getInstance(), R.raw.json_data);
+        String rawStr = FileUtils.readRawNoSpace(AssistApplication.Companion.getInstance(), R.raw.json_data);
 
         AllData rawAllData = null;
         AllData sdCardAllData = null;
@@ -287,7 +287,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
             sdCardStr = FileUtils.readFileSingleLine(filePath);
 
             if (null == sdCardStr) {
-                FileUtils.copyFilesFromRawNoSpace(AssistApplication.getInstance(), R.raw.json_data, filePath);
+                FileUtils.copyFilesFromRawNoSpace(AssistApplication.Companion.getInstance(), R.raw.json_data, filePath);
                 sdCardStr = rawStr;
 
                 if (null != rawStr) return JsonUtils.getObjectFromJson(rawStr, AllData.class);
@@ -305,7 +305,7 @@ public class MainActivity extends BaseActivity implements EasyPermissions.Permis
         if (null != rawAllData && null != sdCardAllData) {
             if (rawAllData.version > sdCardAllData.version) {
                 allData = rawAllData;
-                FileUtils.copyFilesFromRawNoSpace(AssistApplication.getInstance(), R.raw.json_data, filePath);
+                FileUtils.copyFilesFromRawNoSpace(AssistApplication.Companion.getInstance(), R.raw.json_data, filePath);
             } else {
                 allData = sdCardAllData;
             }

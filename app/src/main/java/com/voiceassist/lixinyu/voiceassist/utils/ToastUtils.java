@@ -115,6 +115,6 @@ public class ToastUtils {
 	}
 
 	public static void showToast(String text) {
-		Toast.makeText(AssistApplication.getInstance(), "" + text, Toast.LENGTH_SHORT).show();
+		Toast.makeText(AssistApplication.Companion.getInstance(), "" + text, Toast.LENGTH_SHORT).show();
 	}
 }
