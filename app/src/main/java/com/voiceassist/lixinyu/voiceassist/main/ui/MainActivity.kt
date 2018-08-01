@@ -140,28 +140,32 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks, IEmpty
     }
 
     private fun initListener() {
-        mOnLevel1ItemClickListener = GridAdapter.OnItemClickListener { position, vo ->
-            if (null != vo!!.node) {
-                mLevel1NameTv!!.text = vo.node.cnName
+        mOnLevel1ItemClickListener = object : GridAdapter.OnItemClickListener {
+            override fun onClick(position: Int, vo: GridViewVo?) {
+
+                if (null != vo!!.node) {
+                    mLevel1NameTv!!.text = vo.node.cnName
+                }
+
+                secondLevelNodes = null
+                if (null != vo && null != vo.relationship) {
+                    secondLevelNodes = vo.relationship.secondLevelNodes
+                }
+
+                val pagerViews = getPagers(secondLevelNodes)
+
+                mLevel2ViewPager!!.adapter = MainPagerAdapter(pagerViews)
+                mLevel2PagerPointer!!.setViewPager(mLevel2ViewPager)
+
+                if (null == pagerViews || pagerViews.size <= 1) {
+                    mLevel2PagerPointer!!.visibility = View.INVISIBLE
+                } else {
+                    mLevel2PagerPointer!!.visibility = View.VISIBLE
+                }
+
+                justifyDisplayEmptyView()
             }
 
-            secondLevelNodes = null
-            if (null != vo && null != vo.relationship) {
-                secondLevelNodes = vo.relationship.secondLevelNodes
-            }
-
-            val pagerViews = getPagers(secondLevelNodes)
-
-            mLevel2ViewPager!!.adapter = MainPagerAdapter(pagerViews)
-            mLevel2PagerPointer!!.setViewPager(mLevel2ViewPager)
-
-            if (null == pagerViews || pagerViews.size <= 1) {
-                mLevel2PagerPointer!!.visibility = View.INVISIBLE
-            } else {
-                mLevel2PagerPointer!!.visibility = View.VISIBLE
-            }
-
-            justifyDisplayEmptyView()
         }
 
         mLevel1NameTv!!.setOnClickListener {
@@ -425,7 +429,14 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks, IEmpty
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+        val mydata: Intent
+        if (data == null) {
+            mydata = Intent()
+        } else {
+            mydata = data
+        }
+
+        super.onActivityResult(requestCode, resultCode, mydata)
 
 
         when (requestCode) {
