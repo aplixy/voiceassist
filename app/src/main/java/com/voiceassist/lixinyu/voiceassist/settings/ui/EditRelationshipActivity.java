@@ -126,9 +126,9 @@ public class EditRelationshipActivity extends BaseActivity implements IEmptyable
     private void initData() {
         setTitle("一级节点列表");
 
-        relationships = MainActivity.mAllData.relationship;
+        relationships = MainActivity.Companion.getMAllData().relationship;
         if (null == relationships) {
-            relationships = MainActivity.mAllData.relationship = new ArrayList<>();
+            relationships = MainActivity.Companion.getMAllData().relationship = new ArrayList<>();
         }
 
         mNodeList = new ArrayList<>();
@@ -147,7 +147,7 @@ public class EditRelationshipActivity extends BaseActivity implements IEmptyable
                             List<Node> nodeList = new ArrayList<>();
                             for (Relationship relationship : relationships) {
                                 if (null == relationship) continue;
-                                Node node = MainActivity.mNodesMap.get(relationship.firstLevelNodeId);
+                                Node node = MainActivity.Companion.getMNodesMap().get(relationship.firstLevelNodeId);
                                 if (null != node) {
                                     nodeList.add(node);
                                 }
@@ -372,7 +372,7 @@ public class EditRelationshipActivity extends BaseActivity implements IEmptyable
             }
         }
 
-        MainActivity.saveAllDatas();
+        MainActivity.Companion.saveAllDatas();
     }
 
     private ArrayList<String> getSelectedRelationIds() {
@@ -437,7 +437,7 @@ public class EditRelationshipActivity extends BaseActivity implements IEmptyable
                         selectedIds.add(node.id);
                     }
 
-                    ArrayMap<String, Node> nodeMap = MainActivity.mNodesMap;
+                    ArrayMap<String, Node> nodeMap = MainActivity.Companion.getMNodesMap();
 
                     HashSet<String> originalIds = new HashSet<>();
                     //List<Relationship> allDataRelations = MainActivity.mAllData.relationship;
@@ -474,7 +474,7 @@ public class EditRelationshipActivity extends BaseActivity implements IEmptyable
                     mAdapter.notifyDataSetChanged();
                     justifyDisplayEmptyView();
 
-                    MainActivity.saveAllDatas();
+                    MainActivity.Companion.saveAllDatas();
 
                     break;
                 }

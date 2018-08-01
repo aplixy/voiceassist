@@ -59,7 +59,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 break;
             }
             case R.id.setting_item_relationship: {
-                if (null == MainActivity.mAllData.nodes || MainActivity.mAllData.nodes.size() == 0) {
+                if (null == MainActivity.Companion.getMAllData().nodes || MainActivity.Companion.getMAllData().nodes.size() == 0) {
                     ToastUtils.showToast("请先配置结点");
                 } else {
                     startActivity(new Intent(this, EditRelationshipActivity.class));

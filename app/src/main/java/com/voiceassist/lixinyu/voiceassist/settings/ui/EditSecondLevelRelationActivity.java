@@ -165,10 +165,10 @@ public class EditSecondLevelRelationActivity extends BaseActivity implements IEm
     private void initData() {
         mPosition = getIntent().getIntExtra("position", -1);
         if (mPosition != -1) {
-            mRelationship = MainActivity.mAllData.relationship.get(mPosition);
+            mRelationship = MainActivity.Companion.getMAllData().relationship.get(mPosition);
         }
 
-        if (null == mRelationship || null == (mFirstLevelNode = MainActivity.mNodesMap.get(mRelationship.firstLevelNodeId))) {
+        if (null == mRelationship || null == (mFirstLevelNode = MainActivity.Companion.getMNodesMap().get(mRelationship.firstLevelNodeId))) {
             ToastUtils.showToast("找不到一级结点");
             finish();
             return;
@@ -215,7 +215,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity implements IEm
                         for (SecondLevelNode secondLevelNode : secondLevelNodes) {
                             if (null == secondLevelNode) continue;
 
-                            Node node = MainActivity.mNodesMap.get(secondLevelNode.secondLevelNodeId);
+                            Node node = MainActivity.Companion.getMNodesMap().get(secondLevelNode.secondLevelNodeId);
                             if (null != node) nodeList.add(node);
                         }
                         return nodeList;
@@ -378,7 +378,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity implements IEm
             }
         }
 
-        MainActivity.saveAllDatas();
+        MainActivity.Companion.saveAllDatas();
 
     }
 
@@ -402,7 +402,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity implements IEm
                         //KGLog.d("要找的一级节点--->" + mRelationship.firstLevelNodeId);
 
                         Relationship realRelationship = null;
-                        for (Relationship relationship : MainActivity.mAllData.relationship) {
+                        for (Relationship relationship : MainActivity.Companion.getMAllData().relationship) {
                             if (null == relationship) continue;
 
                             //KGLog.i("内存中的一级节点--->" + relationship.firstLevelNodeId);
@@ -459,7 +459,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity implements IEm
                             for (SecondLevelNode secondLevelNode :
                                     secondLevelNodeList) {
                                 if (null == secondLevelNode) continue;
-                                Node node = MainActivity.mNodesMap.get(secondLevelNode.secondLevelNodeId);
+                                Node node = MainActivity.Companion.getMNodesMap().get(secondLevelNode.secondLevelNodeId);
                                 if (null == node) continue;
                                 realList.add(node);
                             }
@@ -473,7 +473,7 @@ public class EditSecondLevelRelationActivity extends BaseActivity implements IEm
                     @Override
                     public void accept(List<Node> selectedList) throws Exception {
                         mLoadingDialog.dismiss();
-                        MainActivity.saveAllDatas();
+                        MainActivity.Companion.saveAllDatas();
 
                         mNodeList.clear();
                         mNodeList.addAll(selectedList);

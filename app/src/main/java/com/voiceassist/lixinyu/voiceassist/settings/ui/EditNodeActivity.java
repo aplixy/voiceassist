@@ -73,7 +73,7 @@ public class EditNodeActivity extends BaseActivity implements IEmptyable {
     private void initData() {
         setTitle("添加或编辑节点");
 
-        mNodeList = MainActivity.mAllData.nodes;
+        mNodeList = MainActivity.Companion.getMAllData().nodes;
 
         mAdapter = new NodeListAdapter(EditNodeActivity.this, mNodeList);
 
@@ -137,7 +137,7 @@ public class EditNodeActivity extends BaseActivity implements IEmptyable {
                                         deleteVoiceFile(realNode.audioPath);
                                     }
 
-                                    MainActivity.saveAllDatas();
+                                    MainActivity.Companion.saveAllDatas();
                                 }
                             })
                             .onNoClickListener(new View.OnClickListener() {
@@ -200,10 +200,10 @@ public class EditNodeActivity extends BaseActivity implements IEmptyable {
         if (null == node) return;
 
         String deleteId = node.id;
-        MainActivity.mNodesMap.remove(deleteId);
+        MainActivity.Companion.getMNodesMap().remove(deleteId);
 
         // 删除关系列表中相关内容
-        List<Relationship> relationshipList = MainActivity.mAllData.relationship;
+        List<Relationship> relationshipList = MainActivity.Companion.getMAllData().relationship;
         if (null != relationshipList) {
             for (int i = 0, level1Size = relationshipList.size(); i < level1Size;) {
                 Relationship relationship = relationshipList.get(i);
@@ -267,10 +267,10 @@ public class EditNodeActivity extends BaseActivity implements IEmptyable {
                     mNodeList.add(0, node);
                 }
 
-                MainActivity.mNodesMap.put(node.id, node);
+                MainActivity.Companion.getMNodesMap().put(node.id, node);
                 mAdapter.notifyDataSetChanged();
                 justifyDisplayEmptyView();
-                MainActivity.saveAllDatas();
+                MainActivity.Companion.saveAllDatas();
                 break;
             }
 

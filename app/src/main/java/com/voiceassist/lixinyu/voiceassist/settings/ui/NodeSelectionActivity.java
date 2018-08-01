@@ -62,7 +62,7 @@ public class NodeSelectionActivity extends BaseActivity {
         List<String> selectedIdList = (List<String>) getIntent().getSerializableExtra("selected_nodes_id");
 
         mVoList = new ArrayList<>();
-        for (Node node : MainActivity.mAllData.nodes) {
+        for (Node node : MainActivity.Companion.getMAllData().nodes) {
             if (null == node) continue;
 
             NodeSelectVo vo = new NodeSelectVo();
