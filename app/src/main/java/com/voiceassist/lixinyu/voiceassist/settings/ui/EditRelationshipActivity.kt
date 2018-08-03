@@ -31,6 +31,7 @@ import com.voiceassist.lixinyu.voiceassist.entity.dto.Node
 import com.voiceassist.lixinyu.voiceassist.entity.dto.Relationship
 import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity
 import com.voiceassist.lixinyu.voiceassist.settings.adapter.RelationshipListAdapter
+import com.voiceassist.lixinyu.voiceassist.utils.KGLog
 
 import java.util.ArrayList
 import java.util.HashSet
@@ -386,6 +387,7 @@ class EditRelationshipActivity : BaseActivity(), IEmptyable {
                         .build()
             }
 
+            KGLog.d("mTipDialog--->$mTipDialog")
             mTipDialog!!.show()
         }
     }

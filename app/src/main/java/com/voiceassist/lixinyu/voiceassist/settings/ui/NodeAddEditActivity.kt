@@ -82,7 +82,7 @@ class NodeAddEditActivity : BaseActivity(), View.OnClickListener {
 
     private fun initData() {
         this.mPosition = intent.getIntExtra("position", -1)
-        this.mNode = intent.getSerializableExtra("node") as Node
+        this.mNode = intent.getSerializableExtra("node") as Node?
 
         if (null != mNode) {
             val id = mNode!!.id + ""
@@ -108,22 +108,22 @@ class NodeAddEditActivity : BaseActivity(), View.OnClickListener {
 
     private fun initListener() {
 
-        mBtnRecord!!.setOnBeforeRecordListener(RecordButton.OnBeforeRecordListener {
+        mBtnRecord!!.setOnBeforeRecordListener {
             if (null == mRxPermissions) mRxPermissions = RxPermissions(this@NodeAddEditActivity)
             if (!mRxPermissions!!.isGranted(Manifest.permission.RECORD_AUDIO)) {
                 requestPermissions()
-                return@OnBeforeRecordListener false
+                return@setOnBeforeRecordListener false
             }
 
             val id = mEtId!!.text.toString()
             if (null == id || id.trim { it <= ' ' }.length == 0) {
                 ToastUtils.showToast("id不能为空")
-                return@OnBeforeRecordListener false
+                return@setOnBeforeRecordListener false
             }
 
             mBtnRecord!!.setSavePath(getFilePath(id))
             true
-        })
+        }
 
         mBtnRecord!!.setOnFinishedRecordListener { audioPath ->
             if (null != audioPath && audioPath.length > 0) {

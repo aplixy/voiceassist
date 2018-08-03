@@ -140,8 +140,10 @@ open class RelationshipListAdapter(protected var mContext: Context, protected va
         notifyItemRemoved(position)//刷新数据移除
     }
 
-    override fun onItemSelect(source: RecyclerView.ViewHolder) {
+    override fun onItemSelect(source: RecyclerView.ViewHolder?) {
         KGLog.d("--->onItemSelect")
+
+        if (source == null) return
 
         mFromPosition = source.adapterPosition
 

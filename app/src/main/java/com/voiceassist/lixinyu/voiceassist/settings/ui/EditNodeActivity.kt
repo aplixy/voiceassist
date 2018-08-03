@@ -89,7 +89,7 @@ class EditNodeActivity : BaseActivity(), IEmptyable {
             }
 
             override fun onLongClick(adapter: NodeListAdapter, position: Int, node: Node?) {
-                if (null == mDeleteDialog) {
+                if (mDeleteDialog == null) {
                     mDeleteDialog = CommonContentDialog.Builder(this@EditNodeActivity)
                             .contentText("确认删除" + node?.cnName + "节点吗？")
                             .onYesClickListener { v ->
@@ -127,7 +127,7 @@ class EditNodeActivity : BaseActivity(), IEmptyable {
                             .onNoClickListener { mDeleteDialog!!.dismiss() }
                             .build()
                 } else {
-                    mDeleteDialog!!.contentTextView.text = "确认删除“" + node?.cnName + "”节点吗？"
+                    mDeleteDialog?.contentTextView?.text = "确认删除“" + node?.cnName + "”节点吗？"
                 }
 
                 val yesButton = mDeleteDialog!!.yesButton
