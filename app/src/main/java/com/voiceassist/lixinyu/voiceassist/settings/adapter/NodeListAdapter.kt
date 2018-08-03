@@ -42,17 +42,17 @@ internal class NodeListAdapter(protected var mContext: Context, protected var mD
 
     override fun onClick(v: View) {
         val position = v.tag as Int
-        if (null != mOnItemClickListener) {
-            mOnItemClickListener!!.onClick(this, position, mData?.get(position))
-        }
+//        if (null != mOnItemClickListener) {
+//            mOnItemClickListener!!.onClick(this, position, mData?.get(position))
+//        }
+
+        mOnItemClickListener?.onClick?.invoke(this, position, mData?.get(position))
     }
 
     override fun onLongClick(v: View): Boolean {
         val position = v.tag as Int
 
-        if (null != mOnItemClickListener) {
-            mOnItemClickListener!!.onLongClick(this, position, mData?.get(position))
-        }
+        mOnItemClickListener?.onLongClick?.invoke(this, position, mData?.get(position))
 
         return false
     }
@@ -69,11 +69,14 @@ internal class NodeListAdapter(protected var mContext: Context, protected var mD
     }
 
     interface OnItemClickListener {
-        fun onClick(adapter: NodeListAdapter, position: Int, node: Node?)
-        fun onLongClick(adapter: NodeListAdapter, position: Int, node: Node?)
+
+        var onClick: ((NodeListAdapter, Int, Node?) -> Unit)?
+        var onLongClick: ((NodeListAdapter, Int, Node?) -> Unit)?
     }
 
-    fun setOnItemClickListener(listener: OnItemClickListener) {
+    fun setOnItemClickListener(listener: OnItemClickListener?) {
         this.mOnItemClickListener = listener
     }
+
+
 }

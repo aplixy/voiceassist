@@ -472,13 +472,13 @@ class EditSecondLevelRelationActivity : BaseActivity(), IEmptyable {
     }
 
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (Activity.RESULT_OK == resultCode) {
             when (requestCode) {
                 REQ_ADD_NODE -> {
-                    var selectedNodeList: List<Node>? = data.getSerializableExtra("selected_node_list") as List<Node>
+                    var selectedNodeList: List<Node>? = data?.getSerializableExtra("selected_node_list") as List<Node>
                     if (null == selectedNodeList) selectedNodeList = ArrayList()
 
                     updateData(selectedNodeList)

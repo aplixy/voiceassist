@@ -81,14 +81,20 @@ class EditNodeActivity : BaseActivity(), IEmptyable {
 
     private fun initListener() {
         mAdapter!!.setOnItemClickListener(object : NodeListAdapter.OnItemClickListener {
-            override fun onClick(adapter: NodeListAdapter, position: Int, node: Node?) {
+
+
+            override var onClick: ((NodeListAdapter, Int, Node?) -> Unit)? = {
+                adapter, position, node ->
+
                 val intent = Intent(this@EditNodeActivity, NodeAddEditActivity::class.java)
                 intent.putExtra("position", position)
                 intent.putExtra("node", node)
                 startActivityForResult(intent, REQ_ADD_EDIT)
             }
 
-            override fun onLongClick(adapter: NodeListAdapter, position: Int, node: Node?) {
+            override var onLongClick: ((NodeListAdapter, Int, Node?) -> Unit)? = {
+                adapter, position, node ->
+
                 if (mDeleteDialog == null) {
                     mDeleteDialog = CommonContentDialog.Builder(this@EditNodeActivity)
                             .contentText("确认删除" + node?.cnName + "节点吗？")
@@ -228,8 +234,10 @@ class EditNodeActivity : BaseActivity(), IEmptyable {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if (data == null) return
+
         if (Activity.RESULT_OK != resultCode) return
 
         when (requestCode) {
