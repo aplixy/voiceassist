@@ -10,7 +10,7 @@ import java.io.File;
 
 public class Constants {
 
-    public static final String SD_CARD_PATH = FileUtils.getInnerSDCardPath();
+    public static final String SD_CARD_PATH = FileUtils.INSTANCE.getInnerSDCardPath();
 
     public static final String ROOT_PATH = SD_CARD_PATH + File.separator + "voice_assist" + File.separator;
 

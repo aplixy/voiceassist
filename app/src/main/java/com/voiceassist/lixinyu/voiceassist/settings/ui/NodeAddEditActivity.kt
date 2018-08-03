@@ -164,7 +164,7 @@ class NodeAddEditActivity : BaseActivity(), View.OnClickListener {
             R.id.add_node_play_imageview -> {
                 val audioPath = mEtAudioPath!!.text.toString()
                 if (null != audioPath && audioPath.length > 0) {
-                    PlayerUtils.getInstance(this).play(audioPath)
+                    PlayerUtils.getInstance(this)?.play(audioPath)
                 } else {
                     ToastUtils.showToast("无效路径")
                 }

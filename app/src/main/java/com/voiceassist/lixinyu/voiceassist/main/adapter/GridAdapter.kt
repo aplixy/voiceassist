@@ -69,7 +69,7 @@ abstract class GridAdapter(private val mContext: Context, private val mData: Lis
         val vo = mData!![position]
 
         if (null != vo && null != vo.node && null != vo.node.audioPath) {
-            PlayerUtils.getInstance(mContext).play(vo.node.audioPath)
+            PlayerUtils.getInstance(mContext)?.play(vo.node.audioPath)
         }
 
 

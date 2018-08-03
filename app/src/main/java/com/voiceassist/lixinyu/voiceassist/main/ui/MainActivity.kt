@@ -233,6 +233,10 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks, IEmpty
 
     private fun getDataSync(filePath: String): AllData? {
         var sdCardStr: String? = null
+
+        //println("AssistApplication.instance--->${AssistApplication.instance}")
+
+        // 每次打开APP时都要检查raw文件中的version，有新版本则用新版，并覆盖SD卡版本，没有新版才用SD卡版本
         val rawStr = FileUtils.readRawNoSpace(AssistApplication.instance!!, R.raw.json_data)
 
         var rawAllData: AllData? = null

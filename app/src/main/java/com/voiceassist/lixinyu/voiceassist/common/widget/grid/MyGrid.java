@@ -59,10 +59,10 @@ public class MyGrid extends LinearLayout {
         int width = getWidth();
         int itemWidth = width / columCount;
 
-        KGLog.d("aaa", "width--->" + width);
-        KGLog.i("aaa", "itemWidth--->" + itemWidth);
-        KGLog.v("aaa", "lineHeight--->" + lineHeight);
-        KGLog.w("aaa", "getHeight()--->" + getHeight());
+        KGLog.INSTANCE.d("aaa", "width--->" + width);
+        KGLog.INSTANCE.i("aaa", "itemWidth--->" + itemWidth);
+        KGLog.INSTANCE.v("aaa", "lineHeight--->" + lineHeight);
+        KGLog.INSTANCE.w("aaa", "getHeight()--->" + getHeight());
 
         LinearLayout ll = null;
         for (int i = 0; i < count; i++) {

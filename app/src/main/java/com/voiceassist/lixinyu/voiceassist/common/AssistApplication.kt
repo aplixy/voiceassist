@@ -18,6 +18,10 @@ import com.voiceassist.lixinyu.voiceassist.main.ui.MainActivity
 
 class AssistApplication : Application() {
 
+    init {
+        mApplication = this
+    }
+
     companion object {
 
         protected var mApplication: AssistApplication? = null
@@ -38,7 +42,12 @@ class AssistApplication : Application() {
                     throw IllegalStateException("Application is not created.")
                 }
                 return mApplication
+
             }
+
+
+
+
     }
 
     override fun onCreate() {
@@ -51,7 +60,6 @@ class AssistApplication : Application() {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         //MultiDex.install(this);
-
 
     }
 

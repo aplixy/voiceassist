@@ -89,12 +89,12 @@ public class CommonDialog extends Dialog {
         }
 
         public Builder heightdp(int val) {
-            height = DisplayUtils.dip2px(context, val);
+            height = DisplayUtils.INSTANCE.dip2px(context, val);
             return this;
         }
 
         public Builder widthdp(int val) {
-            width = DisplayUtils.dip2px(context, val);
+            width = DisplayUtils.INSTANCE.dip2px(context, val);
             return this;
         }
 
