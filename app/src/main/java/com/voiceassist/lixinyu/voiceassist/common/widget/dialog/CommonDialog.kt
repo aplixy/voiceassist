@@ -33,7 +33,6 @@ open class CommonDialog private constructor(builder: Builder, resStyle: Int) : D
         width = builder.width
         cancelTouchout = builder.cancelTouchout
         view = builder.view
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
