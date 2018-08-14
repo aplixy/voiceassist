@@ -43,7 +43,7 @@ object FileUtils {
                 val `is` = proc.inputStream
                 val isr = InputStreamReader(`is`)
                 val br = BufferedReader(isr)
-                var line: String
+                var line: String?
                 while (true) {
                     line = br.readLine()
                     if (line == null) break
@@ -72,7 +72,7 @@ object FileUtils {
             val `is` = context.resources.assets.open(fileName)
             val isr = InputStreamReader(`is`, "UTF-8")
             val br = BufferedReader(isr)
-            var str: String
+            var str: String?
             if (null == sb) {
                 sb = StringBuilder()
             }
@@ -186,7 +186,7 @@ object FileUtils {
             `is` = context.resources.openRawResource(rawId)
             isr = InputStreamReader(`is`!!, "UTF-8")
             br = BufferedReader(isr)
-            var str: String
+            var str: String?
 
             bw = BufferedWriter(FileWriter(file))
 
@@ -291,7 +291,7 @@ object FileUtils {
 
         }
 
-        KGLog.d("2nd--->readFileSingleLine--->${sb.toString()}")
+        //KGLog.d("2nd--->readFileSingleLine--->${sb.toString()}")
 
 
         return sb?.toString()

@@ -36,6 +36,7 @@ import com.voiceassist.lixinyu.voiceassist.settings.ui.IEmptyable
 import com.voiceassist.lixinyu.voiceassist.settings.ui.SettingActivity
 import com.voiceassist.lixinyu.voiceassist.utils.FileUtils
 import com.voiceassist.lixinyu.voiceassist.utils.JsonUtils
+import com.voiceassist.lixinyu.voiceassist.utils.KGLog
 import com.voiceassist.lixinyu.voiceassist.utils.ToastUtils
 
 import java.util.ArrayList
@@ -234,7 +235,7 @@ class MainActivity : BaseActivity(), EasyPermissions.PermissionCallbacks, IEmpty
     private fun getDataSync(filePath: String): AllData? {
         var sdCardStr: String? = null
 
-        //println("AssistApplication.instance--->${AssistApplication.instance}")
+        KGLog.d("AssistApplication.instance--->${AssistApplication.instance}")
 
         // 每次打开APP时都要检查raw文件中的version，有新版本则用新版，并覆盖SD卡版本，没有新版才用SD卡版本
         val rawStr = FileUtils.readRawNoSpace(AssistApplication.instance!!, R.raw.json_data)
